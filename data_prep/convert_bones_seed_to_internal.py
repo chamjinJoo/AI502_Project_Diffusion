@@ -21,6 +21,32 @@ from utils.schema_utils import inspect_schema, source_info_from_path
 from utils.source_filter import filter_source_paths
 
 
+def preprocessing_assumptions(cfg: dict[str, Any]) -> dict[str, Any]:
+    """Return assumptions that affect converted [T, 65] arrays."""
+    return {
+        "target_fps": float(cfg["target_fps"]),
+        "assume_fps_if_missing": cfg.get("assume_fps_if_missing"),
+        "source_joint_unit": cfg.get("source_joint_unit", "radians"),
+        "source_root_pos_unit": cfg.get("source_root_pos_unit", "meters"),
+        "source_root_euler_unit": cfg.get("source_root_euler_unit", "degrees"),
+        "joint_pos_only_mode": bool(cfg.get("joint_pos_only_mode", False)),
+        "allow_joint_vel_fallback": bool(cfg.get("allow_joint_vel_fallback", False)),
+        "allow_body_pos_zero_fallback": bool(cfg.get("allow_body_pos_zero_fallback", False)),
+        "allow_body_quat_identity_debug_fallback": bool(cfg.get("allow_body_quat_identity_debug_fallback", False)),
+        "renormalize_quaternion": bool(cfg.get("renormalize_quaternion", True)),
+        "expected_joint_count": int(cfg["expected_joint_count"]),
+    }
+
+
+def _assumptions_match(row: dict[str, Any], cfg: dict[str, Any]) -> bool:
+    """Check whether a reusable manifest row was built with current assumptions."""
+    expected = preprocessing_assumptions(cfg)
+    previous = row.get("preprocessing_assumptions")
+    if previous is None:
+        return False
+    return previous == expected
+
+
 def _stack_columns(columns: dict[str, np.ndarray], names: list[str]) -> np.ndarray:
     """Stack named scalar columns into [T, D]."""
     return np.stack([columns[name] for name in names], axis=1).astype(np.float32)
@@ -77,6 +103,7 @@ def convert_one_csv(path: Path, sequence_id: str, output_path: Path, cfg: dict[s
         "processed_npy_path": str(output_path),
         "fps_original": schema.get("fps") if schema.get("fps") is not None else assumed_fps,
         "fps_output": float(cfg["target_fps"]),
+        "preprocessing_assumptions": preprocessing_assumptions(cfg),
         "joint_pos_only_mode": joint_pos_only_mode,
         "assumed_fps": schema.get("fps") is None and assumed_fps is not None,
         "source_joint_unit": cfg.get("source_joint_unit", "radians"),
@@ -141,7 +168,10 @@ def convert_one_csv(path: Path, sequence_id: str, output_path: Path, cfg: dict[s
         joint_pos, body_quat, body_pos, quat_changed = resample_motion_parts(
             joint_pos, body_quat, body_pos, fps_in=fps_in, fps_out=float(cfg["target_fps"])
         )
-        joint_vel = resample_array(joint_vel, fps_in=fps_in, fps_out=float(cfg["target_fps"]))  # [T, 29]
+        if meta["used_joint_vel_fallback"]:
+            joint_vel = finite_difference(joint_pos, dt=1.0 / float(cfg["target_fps"]))  # [T, 29]
+        else:
+            joint_vel = resample_array(joint_vel, fps_in=fps_in, fps_out=float(cfg["target_fps"]))  # [T, 29]
         meta["quaternion_renormalized"] = bool(meta["quaternion_renormalized"] or quat_changed)
 
     sequence = np.concatenate([joint_pos, joint_vel, body_quat, body_pos], axis=1).astype(np.float32)  # [T, 65]
@@ -156,7 +186,7 @@ def convert_one_csv(path: Path, sequence_id: str, output_path: Path, cfg: dict[s
     return meta, sequence
 
 
-def convert_bones_seed(config_path: str | Path) -> list[dict[str, Any]]:
+def convert_bones_seed(config_path: str | Path, force_rebuild: bool = False) -> list[dict[str, Any]]:
     """Convert all CSV sources under configured roots."""
     cfg = load_yaml(config_path)
     output_root = Path(cfg["output_root"])
@@ -166,7 +196,7 @@ def convert_bones_seed(config_path: str | Path) -> list[dict[str, Any]]:
     all_csv_paths = find_files(cfg["source_roots"], (".csv",))
     csv_paths = filter_source_paths(all_csv_paths, cfg)
     progress_every = int(cfg.get("progress_every", 100))
-    skip_existing = bool(cfg.get("skip_existing", True))
+    skip_existing = bool(cfg.get("skip_existing", True)) and not force_rebuild
     start_time = time.time()
     print(f"[convert] found {len(all_csv_paths)} CSV files, selected {len(csv_paths)} after filters", flush=True)
 
@@ -179,8 +209,20 @@ def convert_bones_seed(config_path: str | Path) -> list[dict[str, Any]]:
         for row in read_jsonl(manifest_path):
             processed = row.get("processed_npy_path")
             source = row.get("source_path")
-            if source and processed and Path(processed).exists() and row.get("validation_passed", False):
+            if (
+                source
+                and processed
+                and Path(processed).exists()
+                and row.get("validation_passed", False)
+                and _assumptions_match(row, cfg)
+            ):
                 existing_by_source[str(source)] = row
+    if skip_existing and manifest_path.exists() and not existing_by_source:
+        print(
+            "[convert] existing manifest found, but no rows match current preprocessing assumptions; "
+            "rebuilding selected files",
+            flush=True,
+        )
 
     for index, path in enumerate(csv_paths, start=1):
         sequence_id = f"motion_{index:06d}"
@@ -208,6 +250,7 @@ def convert_bones_seed(config_path: str | Path) -> list[dict[str, Any]]:
 
     append_jsonl(manifests_dir / "all_manifest.jsonl", manifest_rows)
     report = {
+        "preprocessing_assumptions": preprocessing_assumptions(cfg),
         "converted_or_reused": len(manifest_rows),
         "reused_existing": reused,
         "newly_converted": len(manifest_rows) - reused,
@@ -226,8 +269,9 @@ def convert_bones_seed(config_path: str | Path) -> list[dict[str, Any]]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="configs/dataset_build.yaml")
+    parser.add_argument("--force_rebuild", action="store_true")
     args = parser.parse_args()
-    rows = convert_bones_seed(args.config)
+    rows = convert_bones_seed(args.config, force_rebuild=args.force_rebuild)
     print(f"converted {len(rows)} valid sequences")
 
 

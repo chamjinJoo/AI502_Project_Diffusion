@@ -22,6 +22,7 @@ samples/
 exports/
 slurms/logs/
 *.sbatch
+AI502TermProject/
 
 # Model and array artifacts
 *.pt

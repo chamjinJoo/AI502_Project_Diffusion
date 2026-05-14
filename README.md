@@ -1,6 +1,6 @@
 # Conditional DDIM Planner
 
-Minimal PyTorch research code for a history-conditioned DDIM planner that predicts humanoid future motion chunks directly in GR00T tracking-reference space. The diffusion core uses Hugging Face `diffusers.DDIMScheduler` with a Diffusion Policy style conditional 1D U-Net denoiser.
+Minimal PyTorch research code for a history-conditioned DDIM planner that predicts humanoid future motion chunks directly in GR00T tracking-reference space. The diffusion core uses Hugging Face `diffusers.DDIMScheduler` with a conditional denoiser from [DiffusionPolicy-`ConditionalUnet1D`](https://github.com/real-stanford/diffusion_policy).
 
 This is not a text-to-motion model. It does not use language encoders, SMPL, action decoders, or robotics framework dependencies.
 

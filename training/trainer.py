@@ -106,6 +106,7 @@ class Trainer:
             checkpoint = torch.load(path, map_location=self.device, weights_only=True)
         except TypeError:
             checkpoint = torch.load(path, map_location=self.device)
+        self._validate_resume_compatibility(checkpoint, path)
         self.diffusion.model.load_state_dict(checkpoint["model"])
         self.optimizer.load_state_dict(checkpoint["optimizer"])
         self.scheduler.load_state_dict(checkpoint["scheduler"])
@@ -114,6 +115,32 @@ class Trainer:
         self.best_val = float(checkpoint.get("best_val", checkpoint.get("val_loss", self.best_val)))
         self.start_epoch = int(checkpoint.get("epoch", 0))
         print(f"[resume] loaded {path} at epoch {self.start_epoch}", flush=True)
+
+    def _validate_resume_compatibility(self, checkpoint: dict[str, Any], path: Path) -> None:
+        """Reject checkpoint resumes that would mix incompatible model/data configs."""
+        checkpoint_cfg = checkpoint.get("config")
+        if not isinstance(checkpoint_cfg, dict):
+            return
+        if "model" not in checkpoint_cfg or "model" not in self.cfg:
+            return
+        current_model = self.cfg.get("model", {})
+        previous_model = checkpoint_cfg.get("model", {})
+        current_arch = str(current_model.get("architecture", "unet"))
+        previous_arch = str(previous_model.get("architecture", "transformer"))
+        if current_arch != previous_arch:
+            raise RuntimeError(
+                f"Refusing to resume {path}: checkpoint architecture={previous_arch!r}, "
+                f"current architecture={current_arch!r}. Use a separate checkpoint_dir or set resume: false."
+            )
+
+        current_data = self.cfg.get("data", {})
+        previous_data = checkpoint_cfg.get("data", {})
+        for key in ("frame_dim", "history_len", "pred_len"):
+            if key in current_data and key in previous_data and int(current_data[key]) != int(previous_data[key]):
+                raise RuntimeError(
+                    f"Refusing to resume {path}: checkpoint data.{key}={previous_data[key]}, "
+                    f"current data.{key}={current_data[key]}."
+                )
 
     def train_epoch(self, epoch: int) -> dict[str, float]:
         self.diffusion.train()

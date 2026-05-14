@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
 from utils.motion_io import ensure_dir, load_yaml, read_jsonl, write_json
+from data_prep.convert_bones_seed_to_internal import preprocessing_assumptions
 
 
 def compute_stats(config_path: str | Path) -> tuple[np.ndarray, np.ndarray]:
@@ -52,6 +53,7 @@ def compute_stats(config_path: str | Path) -> tuple[np.ndarray, np.ndarray]:
     write_json(
         stats_dir / "stats.json",
         {
+            "preprocessing_assumptions": preprocessing_assumptions(cfg),
             "num_train_sequences": len(train_rows),
             "num_train_frames": int(total_count),
             "mean": mean.astype(float).tolist(),

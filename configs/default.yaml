@@ -13,6 +13,8 @@ data:
   stats_path: processed_dataset/stats/stats.json
   val_split: 0.0
   frame_dim: 65
+  fps: 50
+  source_fps_if_assumed: 120
   history_len: 20
   pred_len: 10
 
@@ -46,7 +48,7 @@ model:
   num_layers: 4
   num_heads: 4
   dropout: 0.1
-  condition_encoder: transformer
+  condition_encoder: transformer # encode previous frames for conditioning
   down_dims: [256, 512, 1024]
   kernel_size: 3
   n_groups: 8

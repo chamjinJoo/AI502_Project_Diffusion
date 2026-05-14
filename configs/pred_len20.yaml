@@ -13,6 +13,8 @@ data:
   stats_path: processed_dataset/stats/stats.json
   val_split: 0.0
   frame_dim: 65
+  fps: 50
+  source_fps_if_assumed: 120
   history_len: 20
   pred_len: 20
 

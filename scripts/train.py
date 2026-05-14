@@ -65,6 +65,42 @@ def _paths_from_file_list(path: str | Path) -> list[str]:
     return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def validate_processed_manifest_metadata(data_cfg: dict[str, Any], split: str) -> None:
+    """Fail early when a processed manifest was built with stale fps assumptions."""
+    file_list = data_cfg.get(f"{split}_file_list")
+    if not file_list or Path(file_list).suffix != ".jsonl":
+        return
+    expected_output_fps = data_cfg.get("fps")
+    expected_assumed_fps = data_cfg.get("source_fps_if_assumed")
+    checked = 0
+    bad_rows: list[str] = []
+    with Path(file_list).open("r", encoding="utf-8") as f:
+        for line in f:
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            checked += 1
+            path = row.get("processed_npy_path", row.get("path", "<unknown>"))
+            if expected_output_fps is not None and "fps_output" in row:
+                if abs(float(row["fps_output"]) - float(expected_output_fps)) > 1e-6:
+                    bad_rows.append(f"{path}: fps_output={row['fps_output']} expected={expected_output_fps}")
+            if expected_assumed_fps is not None and row.get("assumed_fps", False):
+                if abs(float(row.get("fps_original", -1.0)) - float(expected_assumed_fps)) > 1e-6:
+                    bad_rows.append(
+                        f"{path}: assumed fps_original={row.get('fps_original')} expected={expected_assumed_fps}"
+                    )
+            if len(bad_rows) >= 5:
+                break
+    if bad_rows:
+        preview = "\n  ".join(bad_rows)
+        raise ValueError(
+            f"{split} manifest appears stale or incompatible with the training config:\n  {preview}\n"
+            "Rebuild processed_dataset with data_prep/build_dataset.py --force_rebuild after changing fps assumptions."
+        )
+    if checked:
+        print(f"[data] checked {checked} {split} manifest metadata rows", flush=True)
+
+
 def resolve_data_paths(data_cfg: dict[str, Any], split: str) -> list[str]:
     """Resolve train/val paths from explicit paths, a JSON file list, or a data directory."""
     file_list_key = f"{split}_file_list"
@@ -110,6 +146,9 @@ def main() -> None:
     set_seed(int(cfg["seed"]))
 
     data_cfg = cfg["data"]
+    validate_processed_manifest_metadata(data_cfg, "train")
+    if data_cfg.get("val_file_list"):
+        validate_processed_manifest_metadata(data_cfg, "val")
     train_paths = resolve_data_paths(data_cfg, "train")
     val_paths = resolve_data_paths(data_cfg, "val") if data_cfg.get("val_paths") or data_cfg.get("val_file_list") else train_paths
     train_dataset = MotionChunkDataset(

@@ -33,7 +33,7 @@ val_ratio: 0.1
 split_seed: 42
 strict_mode: true
 joint_pos_only_mode: false
-assume_fps_if_missing:
+assume_fps_if_missing: 120
 allow_joint_vel_fallback: true
 allow_body_pos_zero_fallback: false
 allow_body_quat_identity_debug_fallback: false

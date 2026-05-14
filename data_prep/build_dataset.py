@@ -43,6 +43,7 @@ def main() -> None:
     parser.add_argument("--config", type=str, default="configs/dataset_build.yaml")
     parser.add_argument("--skip_inspect", action="store_true")
     parser.add_argument("--skip_sanity", action="store_true")
+    parser.add_argument("--force_rebuild", action="store_true")
     args = parser.parse_args()
 
     total_start = time.time()
@@ -54,7 +55,7 @@ def main() -> None:
         inspect_sources(args.config)
         print("[build] inspect done", flush=True)
     print("[build] convert start", flush=True)
-    rows = convert_bones_seed(args.config)
+    rows = convert_bones_seed(args.config, force_rebuild=args.force_rebuild)
     if not rows:
         raise ValueError("No valid sequences were converted. Check reports/conversion_report.json.")
     print("[build] split start", flush=True)
