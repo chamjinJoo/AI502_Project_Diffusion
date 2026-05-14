@@ -1,0 +1,53 @@
+seed: 42
+
+data:
+  train_paths: []
+  val_paths: []
+
+  train_file_list: processed_dataset/manifests/train_manifest.jsonl
+  val_file_list: processed_dataset/manifests/val_manifest.jsonl
+
+  train_data_dir:
+  val_data_dir:
+
+  stats_path: processed_dataset/stats/stats.json
+  val_split: 0.0
+  frame_dim: 65
+  history_len: 20
+  pred_len: 10
+
+training:
+  batch_size: 512
+  epochs: 5000
+  train_samples_per_epoch: 8192
+  val_samples_per_epoch: 1024
+  random_window_sampling: true
+  num_workers: 4
+  lr: 0.0001
+  weight_decay: 0.0001
+  grad_clip: 1.0
+  velocity_loss_weight: 0.0
+  quaternion_loss_weight: 0.0
+  checkpoint_dir: checkpoints/unet_pred_len10
+  resume: true
+  use_wandb: false
+  device: cuda
+
+diffusion:
+  num_train_timesteps: 1000
+  num_inference_steps: 20
+  beta_schedule: squaredcos_cap_v2
+  prediction_type: epsilon
+  clip_sample: false
+
+model:
+  architecture: unet
+  dim: 256
+  num_layers: 4
+  num_heads: 4
+  dropout: 0.1
+  condition_encoder: transformer
+  down_dims: [256, 512, 1024]
+  kernel_size: 3
+  n_groups: 8
+  cond_predict_scale: false

@@ -1,0 +1,46 @@
+source_roots:
+  # Change this to the actual BONES-SEED / Unitree G1 CSV directory.
+  # Relative paths are resolved from the project root when commands are run there.
+  - data/raw/bones_seed_g1
+output_root: processed_dataset
+dataset_category: locomotion
+include_keywords:
+  - walk
+  - jog
+  - run
+  - jump
+  - turn
+  - arc
+  - come_up
+  - come_down
+exclude_keywords:
+  - sitting
+  - sit_
+  - idle
+  - dancing
+  - button
+  - valve
+  - lever
+  - handle
+  - crank
+
+target_fps: 50
+source_joint_unit: degrees
+source_root_pos_unit: centimeters
+source_root_euler_unit: degrees
+min_sequence_length: 20
+val_ratio: 0.1
+split_seed: 42
+strict_mode: true
+joint_pos_only_mode: false
+assume_fps_if_missing:
+allow_joint_vel_fallback: true
+allow_body_pos_zero_fallback: false
+allow_body_quat_identity_debug_fallback: false
+renormalize_quaternion: true
+grouped_split: false
+expected_joint_count: 29
+quaternion_norm_tolerance: 0.05
+std_epsilon: 0.000001
+progress_every: 100
+skip_existing: true

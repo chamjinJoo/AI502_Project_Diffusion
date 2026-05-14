@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments and local config
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Large datasets and generated artifacts
+data/
+processed_dataset/
+checkpoints/
+trained_model/
+samples/
+exports/
+slurms/logs/
+*.sbatch
+
+# Model and array artifacts
+*.pt
+*.pth
+*.ckpt
+*.npy
+*.npz
+
+# Logs and temporary files
+*.log
+*.out
+*.err
+*.tmp
+tmp/
+workcache/
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/
