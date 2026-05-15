@@ -200,20 +200,22 @@ training:
 
 The auxiliary losses are deliberately small. The main objective remains epsilon-prediction MSE, while the auxiliary terms lightly encourage velocity consistency, unit quaternions, and continuity from the last history frame.
 
-Useful Transformer configs/checkpoints:
+Recommended Transformer checkpoint:
 
 ```text
 configs/default.yaml
-configs/transformer_aux_light_scratch.yaml
-checkpoints/transformer_pred_len10_fps120_YYYYMMDD/
+checkpoints/pred_len10/best.pt
 ```
 
-The older pure-noise-loss Transformer baseline is kept for comparison:
+This checkpoint is the curated job 27 best model trained with the default
+`pred_len=10` Transformer setup. It is the checkpoint to use for practical
+sampling and GR00T/SONIC tracking-reference experiments in this repository.
 
-```text
-configs/transformer_baseline.yaml
-checkpoints/transformer_pred_len10_fps120/
-```
+Example generated chunks from this checkpoint are included under
+`samples/pred_len10/`. These samples keep the model-predicted `joint_vel`
+channels. That is the recommended path for now; finite-difference velocity
+reconstruction is still available as an export option, but it is not the
+default recommendation.
 
 ### Diffusion Policy Style ConditionalUnet1D
 
@@ -245,14 +247,6 @@ Train the default Transformer configuration:
 python scripts/train.py --config configs/default.yaml
 ```
 
-Train the older pure-noise-loss Transformer baseline:
-
-```bash
-python scripts/train.py --config configs/transformer_baseline.yaml
-```
-
-The default config follows the scratch auxiliary Transformer setup in `configs/transformer_aux_light_scratch.yaml`, with date-based checkpoint naming enabled by default.
-
 `training.checkpoint_dir` may contain date tokens that are expanded at train launch time:
 
 ```yaml
@@ -269,8 +263,8 @@ Sample from a condition history:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/transformer_pred_len10_fps120_YYYYMMDD/best.pt \
-  --cond samples/transformer_future_reference_check/sample_00_cond_history.npy \
+  --checkpoint checkpoints/pred_len10/best.pt \
+  --cond path/to/cond_history.npy \
   --num_inference_steps 50 \
   --denormalize \
   --normalize_quat \
@@ -281,16 +275,29 @@ Sample with externally supplied initial noise `x_T`:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/transformer_pred_len10_fps120_YYYYMMDD/best.pt \
-  --cond samples/transformer_future_reference_check/sample_00_cond_history.npy \
-  --x_T samples/transformer_future_reference_check/sample_00_x_T.npy \
+  --checkpoint checkpoints/pred_len10/best.pt \
+  --cond path/to/cond_history.npy \
+  --x_T path/to/initial_noise_x_T.npy \
   --num_inference_steps 50 \
   --denormalize \
   --normalize_quat \
   --output samples/predicted_chunk.npy
 ```
 
-`--normalize_quat` normalizes the generated `body_quat` channels after sampling. `--reconstruct_velocity --fps 50` can replace predicted joint velocity channels with finite differences of predicted joint positions, but this may amplify noise if the generated joint positions are not smooth.
+`--normalize_quat` normalizes the generated `body_quat` channels after sampling.
+By default, use the model-predicted `joint_vel` channels. `--reconstruct_velocity
+--fps 50` can replace them with finite differences of predicted joint positions,
+but this may amplify noise if the generated joint positions are not smooth.
+
+Included sample outputs from the recommended checkpoint:
+
+```text
+samples/pred_len10/sample_00_predicted_future.npy
+samples/pred_len10/sample_01_predicted_future.npy
+samples/pred_len10/sample_02_predicted_future.npy
+samples/pred_len10/sample_03_predicted_future.npy
+samples/pred_len10/evaluation_summary.json
+```
 
 ## GR00T / SONIC Tracking Compatibility
 
