@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Any
 
@@ -153,10 +154,24 @@ class Trainer:
                 f"Refusing to resume {path}: checkpoint architecture={previous_arch!r}, "
                 f"current architecture={current_arch!r}. Use a separate checkpoint_dir or set resume: false."
             )
-        if current_arch == "unet":
+        if current_arch == "transformer":
             for key, default in (
                 ("condition_encoder", "transformer"),
-                ("condition_summary", "mean"),
+                ("dim", None),
+                ("num_layers", None),
+                ("num_heads", None),
+            ):
+                current_value = current_model.get(key, default)
+                previous_value = previous_model.get(key, default)
+                if current_value != previous_value:
+                    raise RuntimeError(
+                        f"Refusing to resume {path}: checkpoint model.{key}={previous_value!r}, "
+                        f"current model.{key}={current_value!r}."
+                    )
+        elif current_arch == "unet":
+            for key, default in (
+                ("condition_encoder", "transformer"),
+                ("condition_summary", "flatten"),
                 ("dim", None),
                 ("down_dims", None),
             ):
@@ -164,8 +179,8 @@ class Trainer:
                 previous_value = previous_model.get(key, default)
                 if current_value != previous_value:
                     raise RuntimeError(
-                        f"Refusing to resume {path}: checkpoint model.{key}={previous_value}, "
-                        f"current model.{key}={current_value}."
+                        f"Refusing to resume {path}: checkpoint model.{key}={previous_value!r}, "
+                        f"current model.{key}={current_value!r}."
                     )
 
         current_data = self.cfg.get("data", {})
@@ -221,7 +236,8 @@ class Trainer:
         }
         for batch in self.val_loader:
             batch = self._move_batch(batch)
-            losses = self._compute_losses(batch["cond"], batch["target"])
+            with torch.amp.autocast("cuda", enabled=self.use_amp):
+                losses = self._compute_losses(batch["cond"], batch["target"])
             for key in totals:
                 totals[key] += float(losses[key].detach().cpu())
         return {key: value / len(self.val_loader) for key, value in totals.items()}
@@ -233,7 +249,7 @@ class Trainer:
             val_metrics = self.validate()
             self.scheduler.step()
             val_loss = val_metrics["loss"]
-            latest_val = val_loss if val_loss == val_loss else train_metrics["loss"]
+            latest_val = val_loss if not math.isnan(val_loss) else train_metrics["loss"]
             is_best = latest_val < self.best_val
             if is_best:
                 self.best_val = latest_val

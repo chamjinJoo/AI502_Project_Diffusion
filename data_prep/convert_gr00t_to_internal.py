@@ -12,7 +12,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
-from utils.motion_io import append_jsonl, ensure_dir, find_files, load_yaml, save_sequence, write_json
+from utils.motion_io import write_jsonl, ensure_dir, find_files, load_yaml, save_sequence, write_json
 from utils.quaternion_utils import normalize_quat, quat_norm_error
 from utils.schema_utils import source_info_from_path
 from utils.source_filter import filter_source_paths
@@ -72,7 +72,7 @@ def convert_gr00t(config_path: str | Path) -> list[dict[str, Any]]:
         except Exception as exc:
             skipped.append({"source_path": str(path), "skip_reasons": [str(exc)]})
 
-    append_jsonl(manifests_dir / "all_manifest.jsonl", rows)
+    write_jsonl(manifests_dir / "all_manifest.jsonl", rows)
     write_json(reports_dir / "conversion_report.json", {"converted": len(rows), "skipped": len(skipped), "skipped_items": skipped})
     return rows
 

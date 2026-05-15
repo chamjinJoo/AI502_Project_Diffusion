@@ -54,7 +54,7 @@ def main() -> None:
         kernel_size=int(model_cfg.get("kernel_size", 3)),
         n_groups=int(model_cfg.get("n_groups", 8)),
         cond_predict_scale=bool(model_cfg.get("cond_predict_scale", False)),
-        condition_summary=str(model_cfg.get("condition_summary", "mean")),
+        condition_summary=str(model_cfg.get("condition_summary", "flatten")),
     ).to(device)
     model.load_state_dict(ckpt["model"])
     model.eval()

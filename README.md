@@ -164,60 +164,65 @@ loss    = MSE(eps_hat, eps)
 
 During inference, deterministic DDIM sampling is used with `eta=0`.
 
-This repository provides two denoiser backbones behind the same interface:
+The denoiser interface is fixed as:
 
 ```text
 model(xt [B, K, 65], cond [B, H, 65], timestep [B]) -> eps_hat [B, K, 65]
 ```
 
-### 1. Diffusion Policy Style ConditionalUnet1D
-
-The U-Net denoiser in [models/conditional_unet1d.py](models/conditional_unet1d.py) is adapted from the public Diffusion Policy `ConditionalUnet1D` design:
-
-- Diffusion Policy repository: https://github.com/real-stanford/diffusion_policy
-- Diffusion Policy paper: https://arxiv.org/abs/2303.04137
-
-This project does not import Diffusion Policy as a dependency. The implementation is simplified and adapted for `[B, K, 65]` humanoid tracking-reference chunks instead of action sequences from the original robotics manipulation setting.
-
-Default config:
-
-```yaml
-model:
-  architecture: unet
-  condition_encoder: transformer
-  condition_summary: flatten
-  down_dims: [256, 512, 1024]
-```
-
-### 2. Transformer Baseline
-
-The Transformer denoiser in [models/denoiser.py](models/denoiser.py) is a small project-local baseline. It uses:
+The current default denoiser is the Transformer implementation in [models/denoiser.py](models/denoiser.py). It uses:
 
 - target-token projection for noisy future chunks
-- timestep embedding
-- condition history encoder
-- temporal Transformer encoder over future tokens
+- sinusoidal timestep embedding
+- Transformer condition encoder over the previous motion history
+- temporal Transformer encoder over the future target tokens
 
-It is selected with:
+The default training config follows the job 23 setup:
 
 ```yaml
 model:
   architecture: transformer
+  dim: 256
+  num_layers: 4
+  num_heads: 4
+
+data:
+  history_len: 20
+  pred_len: 10
+  fps: 50
+
+training:
+  velocity_loss_weight: 0.0000001
+  quaternion_loss_weight: 0.00001
+  continuity_loss_weight: 0.0001
+  auxiliary_max_timestep: 200
 ```
 
-The currently useful baseline/checkpoint family is Transformer-based:
+The auxiliary losses are deliberately small. The main objective remains epsilon-prediction MSE, while the auxiliary terms lightly encourage velocity consistency, unit quaternions, and continuity from the last history frame.
+
+Useful Transformer configs/checkpoints:
+
+```text
+configs/default.yaml
+configs/transformer_aux_light_scratch.yaml
+checkpoints/transformer_pred_len10_fps120_YYYYMMDD/
+```
+
+The older pure-noise-loss Transformer baseline is kept for comparison:
 
 ```text
 configs/transformer_baseline.yaml
 checkpoints/transformer_pred_len10_fps120/
 ```
 
-Auxiliary-loss scratch training for smoother tracking references uses:
+### Diffusion Policy Style ConditionalUnet1D
 
-```text
-configs/transformer_aux_light_scratch.yaml
-checkpoints/transformer_pred_len10_fps120_aux_light_scratch/
-```
+The repository also contains a Diffusion Policy style U-Net in [models/conditional_unet1d.py](models/conditional_unet1d.py), adapted from the public `ConditionalUnet1D` design:
+
+- Diffusion Policy repository: https://github.com/real-stanford/diffusion_policy
+- Diffusion Policy paper: https://arxiv.org/abs/2303.04137
+
+This code path is retained for experiments, but it is not the current default. In our BONES-SEED locomotion setting, the Transformer denoiser has been the more useful baseline so far.
 
 ## Requirements
 
@@ -234,23 +239,27 @@ Install an equivalent Python environment with PyTorch, NumPy, PyYAML, and Huggin
 
 ## Train
 
-Train the default U-Net configuration:
+Train the default Transformer configuration:
 
 ```bash
 python scripts/train.py --config configs/default.yaml
 ```
 
-Train the Transformer baseline:
+Train the older pure-noise-loss Transformer baseline:
 
 ```bash
 python scripts/train.py --config configs/transformer_baseline.yaml
 ```
 
-Train the Transformer model from scratch with light tracking-reference auxiliary losses:
+The default config follows the scratch auxiliary Transformer setup in `configs/transformer_aux_light_scratch.yaml`, with date-based checkpoint naming enabled by default.
 
-```bash
-python scripts/train.py --config configs/transformer_aux_light_scratch.yaml
+`training.checkpoint_dir` may contain date tokens that are expanded at train launch time:
+
+```yaml
+checkpoint_dir: checkpoints/transformer_pred_len10_fps120_{date}
 ```
+
+Supported tokens are `{date}` -> `YYYYMMDD` and `{datetime}` -> `YYYYMMDD_HHMMSS`.
 
 The training script checks processed manifest metadata before training. If `assume_fps_if_missing`, `data.fps`, or the processed dataset changes, rebuild the dataset or refresh any external dataset cache before training.
 
@@ -260,7 +269,7 @@ Sample from a condition history:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/transformer_pred_len10_fps120/best.pt \
+  --checkpoint checkpoints/transformer_pred_len10_fps120_YYYYMMDD/best.pt \
   --cond samples/transformer_future_reference_check/sample_00_cond_history.npy \
   --num_inference_steps 50 \
   --denormalize \
@@ -272,7 +281,7 @@ Sample with externally supplied initial noise `x_T`:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/transformer_pred_len10_fps120/best.pt \
+  --checkpoint checkpoints/transformer_pred_len10_fps120_YYYYMMDD/best.pt \
   --cond samples/transformer_future_reference_check/sample_00_cond_history.npy \
   --x_T samples/transformer_future_reference_check/sample_00_x_T.npy \
   --num_inference_steps 50 \

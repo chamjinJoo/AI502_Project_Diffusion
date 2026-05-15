@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
+from datetime import datetime
 import sys
 from pathlib import Path
 from typing import Any
@@ -135,6 +136,21 @@ def seed_worker(worker_id: int) -> None:
     np.random.seed(worker_seed)
 
 
+def expand_checkpoint_dir(cfg: dict[str, Any]) -> None:
+    """Expand date tokens in training.checkpoint_dir at launch time."""
+    train_cfg = cfg["training"]
+    checkpoint_dir = str(train_cfg["checkpoint_dir"])
+    now = datetime.now()
+    expanded = (
+        checkpoint_dir
+        .replace("{date}", now.strftime("%Y%m%d"))
+        .replace("{datetime}", now.strftime("%Y%m%d_%H%M%S"))
+    )
+    train_cfg["checkpoint_dir"] = expanded
+    if expanded != checkpoint_dir:
+        print(f"[config] checkpoint_dir={expanded}", flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="configs/default.yaml")
@@ -143,6 +159,7 @@ def main() -> None:
     cfg = load_config(args.config)
     if args.device is not None:
         cfg["training"]["device"] = args.device
+    expand_checkpoint_dir(cfg)
     set_seed(int(cfg["seed"]))
 
     data_cfg = cfg["data"]

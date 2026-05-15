@@ -36,8 +36,8 @@ def read_json(path: str | Path) -> Any:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
-def append_jsonl(path: str | Path, rows: list[dict[str, Any]]) -> None:
-    """Write JSONL rows."""
+def write_jsonl(path: str | Path, rows: list[dict[str, Any]]) -> None:
+    """Overwrite a JSONL file with the given rows."""
     path = Path(path)
     ensure_dir(path.parent)
     with path.open("w", encoding="utf-8") as f:

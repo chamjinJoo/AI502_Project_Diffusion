@@ -7,11 +7,11 @@ from torch import nn
 
 from .condition_encoder import ConditionEncoder
 from .conditional_unet1d import ConditionalUnet1D
-from .time_embedding import TimestepEmbedding
+from .time_embedding import TimestepEmbedding, sinusoidal_positional_encoding
 
 
 class TransformerDenoiser(nn.Module):
-    """Small Transformer baseline for GR00T tracking-reference chunks."""
+    """Transformer denoiser with sinusoidal PE and joint history+target attention."""
 
     def __init__(
         self,
@@ -28,6 +28,7 @@ class TransformerDenoiser(nn.Module):
         self.frame_dim = frame_dim
         self.history_len = history_len
         self.pred_len = pred_len
+        self.model_dim = model_dim
 
         self.target_proj = nn.Linear(frame_dim, model_dim)
         self.time_embed = TimestepEmbedding(model_dim)
@@ -39,8 +40,6 @@ class TransformerDenoiser(nn.Module):
             dropout=dropout,
             encoder_type=condition_encoder,
         )
-        self.cond_summary = nn.Sequential(nn.LayerNorm(model_dim), nn.Linear(model_dim, model_dim))
-
         layer = nn.TransformerEncoderLayer(
             d_model=model_dim,
             nhead=num_heads,
@@ -64,14 +63,23 @@ class TransformerDenoiser(nn.Module):
         Returns:
             Predicted noise with shape [B, K, 65].
         """
-        target_tokens = self.target_proj(xt)  # [B, K, D]
-        time_tokens = self.time_embed(timesteps)[:, None, :]  # [B, 1, D]
-        cond_tokens = self.condition_encoder(cond)  # [B, H, D]
-        cond_token = self.cond_summary(cond_tokens.mean(dim=1, keepdim=True))  # [B, 1, D]
+        B, K, _ = xt.shape
+        H = self.history_len
+        D = self.model_dim
 
-        x = target_tokens + time_tokens + cond_token  # [B, K, D]
-        x = self.backbone(x)  # [B, K, D]
-        return self.output(x)  # [B, K, 65]
+        cond_tokens = self.condition_encoder(cond)  # [B, H, D]
+        target_tokens = self.target_proj(xt)  # [B, K, D]
+        time_emb = self.time_embed(timesteps)[:, None, :]  # [B, 1, D]
+
+        # Sinusoidal PE: history occupies positions 0..H-1, target H..H+K-1
+        cond_pe = sinusoidal_positional_encoding(H, D, cond.device, cond.dtype, offset=0)
+        target_pe = sinusoidal_positional_encoding(K, D, xt.device, xt.dtype, offset=H)
+
+        # Concat history and target tokens for joint self-attention
+        x = torch.cat([cond_tokens + cond_pe, target_tokens + target_pe], dim=1)  # [B, H+K, D]
+        x = x + time_emb  # broadcast timestep to all positions
+        x = self.backbone(x)  # [B, H+K, D]
+        return self.output(x[:, H:])  # [B, K, 65]
 
 
 class UnetDenoiser(nn.Module):

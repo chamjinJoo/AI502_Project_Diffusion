@@ -12,7 +12,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
-from utils.motion_io import append_jsonl, load_yaml, read_jsonl
+from utils.motion_io import write_jsonl, load_yaml, read_jsonl
 
 
 def make_splits(config_path: str | Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -45,9 +45,9 @@ def make_splits(config_path: str | Path) -> tuple[list[dict[str, Any]], list[dic
     for row in val_rows:
         row["split"] = "val"
 
-    append_jsonl(manifests_dir / "train_manifest.jsonl", train_rows)
-    append_jsonl(manifests_dir / "val_manifest.jsonl", val_rows)
-    append_jsonl(manifests_dir / "all_manifest.jsonl", train_rows + val_rows)
+    write_jsonl(manifests_dir / "train_manifest.jsonl", train_rows)
+    write_jsonl(manifests_dir / "val_manifest.jsonl", val_rows)
+    write_jsonl(manifests_dir / "all_manifest.jsonl", train_rows + val_rows)
     return train_rows, val_rows
 
 

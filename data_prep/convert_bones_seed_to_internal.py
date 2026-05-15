@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
 from utils.finite_difference import finite_difference
-from utils.motion_io import append_jsonl, ensure_dir, find_files, load_yaml, read_jsonl, read_numeric_csv, save_sequence, write_json
+from utils.motion_io import write_jsonl, ensure_dir, find_files, load_yaml, read_jsonl, read_numeric_csv, save_sequence, write_json
 from utils.quaternion_utils import euler_xyz_to_quat, identity_quat, normalize_quat, quat_norm_error
 from utils.resample_utils import resample_array, resample_motion_parts
 from utils.schema_utils import inspect_schema, source_info_from_path
@@ -248,7 +248,7 @@ def convert_bones_seed(config_path: str | Path, force_rebuild: bool = False) -> 
                 flush=True,
             )
 
-    append_jsonl(manifests_dir / "all_manifest.jsonl", manifest_rows)
+    write_jsonl(manifests_dir / "all_manifest.jsonl", manifest_rows)
     report = {
         "preprocessing_assumptions": preprocessing_assumptions(cfg),
         "converted_or_reused": len(manifest_rows),
