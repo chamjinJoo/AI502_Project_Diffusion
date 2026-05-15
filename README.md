@@ -82,6 +82,37 @@ allow_body_quat_identity_debug_fallback: false
 
 Important: root position and root orientation are not silently fabricated. Clips missing required root fields are skipped. Joint velocity may be reconstructed from finite differences because many source CSVs provide joint position but not velocity.
 
+## Data Files
+
+Raw and processed motion data are not committed to git because they are large generated or downloaded artifacts. The repository `.gitignore` excludes:
+
+```text
+data/
+processed_dataset/
+checkpoints/
+samples/
+exports/
+```
+
+On a new machine, download BONES-SEED separately, place the Unitree G1 MuJoCo-compatible CSV data under the path configured in [configs/dataset_build.yaml](configs/dataset_build.yaml), then run the preprocessing pipeline.
+
+The default expected source path is:
+
+```text
+data/raw/bones_seed_g1
+```
+
+You may either download from the BONES-SEED Hugging Face dataset page or from the Bones Studio dataset page. If using the Hugging Face CLI, the workflow is:
+
+```bash
+mkdir -p data/raw
+huggingface-cli download bones-studio/seed \
+  --repo-type dataset \
+  --local-dir data/raw/bones_seed_g1
+```
+
+If the downloaded archive or directory layout differs, keep only the relevant BONES-SEED / Unitree G1 MuJoCo CSV tree under `data/raw/bones_seed_g1`, or update `source_roots` in [configs/dataset_build.yaml](configs/dataset_build.yaml).
+
 ## Dataset Build
 
 Inspect source schemas:

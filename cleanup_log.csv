@@ -1,0 +1,567 @@
+== bmlgd10 ==
+[2026-05-15 16:11:30] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_vanilla_rnn_successor_feature_seed42_rtx5090_0_n4
+[2026-05-15 16:11:30] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_txy33h2q_0 (mtime age ~ 32 days)
+[2026-05-15 16:11:30] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775735721 (mtime age ~ 35 days)
+[2026-05-15 16:11:30] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_ego_fig3_current_5090_final
+[2026-05-15 16:11:30] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_staged_hairpin_ego_tem_temp0p500
+[2026-05-15 16:11:30] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage5_wall_ego_ungated_zero_shot_seed42_rtx5090_0_n1
+[2026-05-15 16:11:30] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_irr4u2ro_0 (mtime age ~ 34 days)
+[2026-05-15 16:11:30] Skipping [workcache] by filter: /scratch/heejun/workcache/ego
+[2026-05-15 16:11:30] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd10_checkpoint_train_GRU_model_checkpoint_seed42_5 (mtime age ~ 12 days)
+[2026-05-15 16:11:30] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_xltphtxu_1 (mtime age ~ 34 days)
+[2026-05-15 16:11:30] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_vcp6uerf_0 (mtime age ~ 31 days)
+[2026-05-15 16:11:30] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd10_wall_main_eval_EGO_sf_l2_seed2026_4 (mtime age ~ 12 days)
+[2026-05-15 16:11:30] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_conv_ar_latent_goal_seed42_rtx5090_0_n2
+[2026-05-15 16:11:30] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_vanilla_rnn_successor_feature_seed2026_rtx5090_0_n1
+[2026-05-15 16:11:30] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_qkjfoxdo_0 (mtime age ~ 34 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_ego_perf_follow_planner_wall_parity_rank01_v1hdmjmi_successor_feature_rtx5090_1 (mtime age ~ 29 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_ehzsxd2k_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_wdw1l62z_0 (mtime age ~ 34 days)
+[2026-05-15 16:11:31] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_smoke_hairpin_gru
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd10_checkpoint_train_GRU_model_checkpoint_seed42_3 (mtime age ~ 11 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_vz3pskxt_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_j1ihi3t2_0 (mtime age ~ 32 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775734082 (mtime age ~ 35 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775735144 (mtime age ~ 35 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_29l237hd_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_ego_perf_follow_planner_wall_parity_rank01_v1hdmjmi_latent_goal_rtx5090_0 (mtime age ~ 28 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_bzhtixp4_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_1775743854 (mtime age ~ 35 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_isar0u31_0 (mtime age ~ 34 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_cdm29ufz_0 (mtime age ~ 34 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_u4fpwt7t_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_0j4e19x8_0 (mtime age ~ 31 days)
+[2026-05-15 16:11:31] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_vanilla_rnn_successor_feature_seed999_rtx5090_0_n2
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_uygullbq_1 (mtime age ~ 31 days)
+[2026-05-15 16:11:31] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_ablation_wall_ego_order1_latent_goal_seed42_rtx5090_0_n4
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_c1bgl0au_1 (mtime age ~ 31 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_vd5kazdz_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_yu71j39v_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:31] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_bmlgd10_rtx5090_checkpoint_train_EGO_w_o_gating_model_ch_2_6f19a16d
+[2026-05-15 16:11:31] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_smoke_hairpin_grpi_taylor3
+[2026-05-15 16:11:31] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_ego_tem_modes_staged_hairpin_ego_tem_delta_order1_temp0p050
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_gpa797s7_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/rebalance_ego999_5090_4140 (mtime age ~ 8 days)
+[2026-05-15 16:11:31] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_multidoor_modelscore_gd10_v1
+[2026-05-15 16:11:31] Skipping [workcache] by filter: /scratch/heejun/workcache/f81a1e93d0448107e5ac18bcd674a0cd066d6b429c1bdecb4d2609cdfab06842
+[2026-05-15 16:11:31] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_1me87dx4_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage4_wall_conv_ar_latent_goal_seed999_rtx5090_0 (mtime age ~ 32 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd10_checkpoint_train_EGO_order-0_model_checkpoint_seed_4 (mtime age ~ 12 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_8amvayla_0 (mtime age ~ 34 days)
+[2026-05-15 16:11:32] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_staged_hairpin_grpi_taylor3
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_olxbn5q2_0 (mtime age ~ 34 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775735884 (mtime age ~ 35 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_b_rtx5090_0_ego_latent_goal_time_corr_high_rtx5090_0 (mtime age ~ 24 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_4i6wemg9_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775735605 (mtime age ~ 35 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_b_rtx5090_0_grpi_latent_goal_base_rtx5090_0 (mtime age ~ 27 days)
+[2026-05-15 16:11:32] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_full_hairpin_ego_tem
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775744000 (mtime age ~ 35 days)
+[2026-05-15 16:11:32] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_correct_p0a_gd10
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_31zvnbh9_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd10_wall_main_eval_EGO_sf_l2_seed2026_5 (mtime age ~ 12 days)
+[2026-05-15 16:11:32] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_multidoor_modelscore_agents_bmlgd10_rtx5090
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_0a67tpof_0 (mtime age ~ 31 days)
+[2026-05-15 16:11:32] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_bmlgd10_rtx5090_wall_main_eval_EGO_latent_l2_seed123_5_dfb4c11c
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd10_wall_main_eval_EGO_latent_l2_seed123_5 (mtime age ~ 12 days)
+[2026-05-15 16:11:32] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_lstm_successor_feature_seed123_rtx5090_0_n3
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd10_wall_main_eval_EGO_sf_l2_seed2026_3 (mtime age ~ 12 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_6jy5hu6d_0 (mtime age ~ 35 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_c_preflight_rtx5090_0_rtx5090_0 (mtime age ~ 23 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_q32abirz_0 (mtime age ~ 34 days)
+[2026-05-15 16:11:32] Skipping [workcache] by filter: /scratch/heejun/workcache/tem_ego_order1_2walls_full
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_9l7na73b_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_ittbgs5f_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:32] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage3_wall_ego_perf_follow_preflight_wall_parity_rank01_v1hdmjmi_successor_feature_rtx5090_bmlgd10
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/subtem_ego_fig3_grpi_like_5090 (mtime age ~ 10 days)
+[2026-05-15 16:11:32] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_multidoor_modelscore_smoke_bmlgd10_rtx5090
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_bxbmofqh_0 (mtime age ~ 34 days)
+[2026-05-15 16:11:32] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_ky8cllbv_0 (mtime age ~ 34 days)
+[2026-05-15 16:11:32] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_transformer_ar_latent_goal_seed42_rtx5090_1_n5
+[2026-05-15 16:11:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_ego_perf_follow_planner_wall_parity_rank01_v1hdmjmi_successor_feature_rtx5090_0 (mtime age ~ 29 days)
+[2026-05-15 16:11:33] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_ego_tem_modes_staged_hairpin_ego_tem_delta_exponential_temp0p050
+[2026-05-15 16:11:33] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_multidoor_grpi_sf_cfg_seed42_bakeoff_bmlgd10_rtx5090_2runs
+[2026-05-15 16:11:33] Skipping [workcache] by filter: /scratch/heejun/workcache/pointmaze_semantic_agent_bmlgd10_rtx5090_2agents
+[2026-05-15 16:11:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775736691 (mtime age ~ 35 days)
+[2026-05-15 16:11:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_6r7yc4y4_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_lxw4oyvv_0 (mtime age ~ 35 days)
+[2026-05-15 16:11:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_1hcz8q02_1 (mtime age ~ 35 days)
+[2026-05-15 16:11:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_5ooeir42_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:33] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_transformer_ar_latent_goal_seed42_rtx5090_0_n5
+[2026-05-15 16:11:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage5_vram_ego_gate_only_fine_tune_rtx5090_0 (mtime age ~ 15 days)
+[2026-05-15 16:11:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_hqmk9xaz_0 (mtime age ~ 35 days)
+[2026-05-15 16:11:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_yt01ll03_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_imfr1q6j_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:33] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_conv_ar_successor_feature_seed42_rtx5090_0_n4
+[2026-05-15 16:11:33] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_staged_hairpin_ego_tem_temp0p100
+[2026-05-15 16:11:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_pe8axkje_1 (mtime age ~ 35 days)
+[2026-05-15 16:11:33] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_staged_hairpin_ego_tem_temp0p010
+[2026-05-15 16:11:33] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_conv_ar_successor_feature_seed2026_rtx5090_0_n1
+[2026-05-15 16:11:33] Skipping [workcache] by filter: /scratch/jungyoung/workcache/c662bac4445bc50a4754b1d1ff08a06817d84f6f1b4c03cd748093b991361711
+[2026-05-15 16:11:33] Summary: checked=208, delete_candidates=200, deleted=0, skipped_by_filter=59
+== bmlgd11 ==
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/user/workcache/wall_transfer_symmetric_bmlgd11_4012 (mtime age ~ 9 days)
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/user/workcache/wall_transfer_symmetric_bmlgd11_3973 (mtime age ~ 9 days)
+[2026-05-15 16:11:34] Skipping [workcache] by filter: /scratch/sjh96/workcache/ddf782407418f57bac634add31fe7b09047462c56e61a37ea63ee650fbcd126f
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_a_grpi_rtx5090_1 (mtime age ~ 28 days)
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd11_wall_ablation_eval_EGO_w_o_gating_sf_l2_seed123_5 (mtime age ~ 12 days)
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775736694 (mtime age ~ 35 days)
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage5_vram_ego_operator_only_fine_tune_rtx5090_1 (mtime age ~ 15 days)
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_387bjxly_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_vcp6uerf_1 (mtime age ~ 31 days)
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd11_transfer_full_train_eval_EGO_sf_l2_seed123_5 (mtime age ~ 11 days)
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_q32abirz_1 (mtime age ~ 34 days)
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775735609 (mtime age ~ 35 days)
+[2026-05-15 16:11:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_vgv6z96v_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:34] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage3_wall_ego_perf_follow_preflight_wall_parity_rank01_v1hdmjmi_successor_feature_rtx5090_bmlgd11
+[2026-05-15 16:11:34] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_staged_hairpin_ego_tem_temp0p025
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_txy33h2q_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:35] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_ego_fig3_current_5090_final
+[2026-05-15 16:11:35] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_conv_ar_latent_goal_seed123_rtx5090_1_n7
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775735149 (mtime age ~ 35 days)
+[2026-05-15 16:11:35] Skipping [workcache] by filter: /scratch/heejun/workcache/pointmaze_semantic_agent_bmlgd11_rtx5090_2agents
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_6jy5hu6d_1 (mtime age ~ 35 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_a_ego_rtx5090_1 (mtime age ~ 28 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775744002 (mtime age ~ 35 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_cdm29ufz_1 (mtime age ~ 34 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_c_rtx5090_1_grpi_proto_x2_rtx5090_1 (mtime age ~ 23 days)
+[2026-05-15 16:11:35] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_bmlgd11_rtx5090_checkpoint_train_EGO_w_o_egocentric_gati_2_84b4f5d5
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_ego_perf_follow_planner_wall_parity_rank01_v1hdmjmi_successor_feature_rtx5090_1 (mtime age ~ 29 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_ehzsxd2k_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_b_rtx5090_1_ego_successor_feature_noise_sigma_low_rtx5090_1 (mtime age ~ 26 days)
+[2026-05-15 16:11:35] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_smoke_hairpin_grpi_ego_gate
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_1775744043 (mtime age ~ 35 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_ju0ivwzm_1 (mtime age ~ 34 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_hqmk9xaz_1 (mtime age ~ 35 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_1vq4szf6_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage4_wall_conv_ar_latent_goal_seed2026_rtx5090_1 (mtime age ~ 32 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_1775743856 (mtime age ~ 35 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd11_wall_main_eval_EGO_sf_l2_seed999_5 (mtime age ~ 12 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_bpcoqqnn_1 (mtime age ~ 32 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775734675 (mtime age ~ 35 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_0j4e19x8_1 (mtime age ~ 31 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_xltphtxu_0 (mtime age ~ 34 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_twcv69xm_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:35] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_1hcz8q02_0 (mtime age ~ 35 days)
+[2026-05-15 16:11:35] Skipping [workcache] by filter: /scratch/heejun/workcache/29381d2efe1f21323ef068b0269300a5196134bf6d459ad8ffea4ef2d4cf1afa
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_947te7l2_0 (mtime age ~ 33 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_b_rtx5090_1_ego_latent_goal_lambda_low_rtx5090_1 (mtime age ~ 23 days)
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_lstm_latent_goal_seed42_rtx5090_1_n7
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage5_wall_ego_full_fine_tune_seed123_rtx5090_1_n3
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_b_ego_latent_goal_base_rtx5090_1 (mtime age ~ 28 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_ego_perf_follow_planner_wall_parity_rank01_v1hdmjmi_latent_goal_rtx5090_1 (mtime age ~ 28 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_b_preflight_rtx5090_1_rtx5090_1 (mtime age ~ 28 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_z01m4gnt_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd11_checkpoint_train_RNN_model_checkpoint_seed123_4 (mtime age ~ 12 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/sym_mppi_alloc2026_5090_v2_4134 (mtime age ~ 9 days)
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_ego_tem_modes_staged_hairpin_ego_tem_exponential_temp0p050
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/edf36edba8b9fba2d4b4ec8d59db61ee97ea1180066274c5d478ddd71b84796f
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd11_transfer_zero_shot_EGO_w_o_egocentric_gating_sf_ru_1 (mtime age ~ 12 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775734083 (mtime age ~ 35 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_a_preflight_rtx5090_1_rtx5090_1 (mtime age ~ 28 days)
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/f81a1e93d0448107e5ac18bcd674a0cd066d6b429c1bdecb4d2609cdfab06842
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd11_transfer_zero_shot_GRU_sf_runtime_l2_zero_shot_see_1 (mtime age ~ 13 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_ldb0se8t_1 (mtime age ~ 34 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775735725 (mtime age ~ 35 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_q1cl6422_1 (mtime age ~ 35 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_isar0u31_1 (mtime age ~ 34 days)
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_multidoor_modelscore_gd11_v1
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_gru_latent_goal_seed42_rtx5090_1_n7
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_full_hairpin_ego_tem
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_wall_sfhyp_phase_c_preflight_rtx5090_1_rtx5090_1 (mtime age ~ 23 days)
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_correct_p0a_gd11
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_staged_hairpin_ego_tem
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_staged_hairpin_ego_tem_temp0p200
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_conv_ar_latent_goal_seed42_rtx5090_1_n7
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_pe8axkje_0 (mtime age ~ 35 days)
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_multidoor_grpi_sf_cfg_seed42_bakeoff_bmlgd11_rtx5090_2runs
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_multidoor_modelscore_smoke_bmlgd11_rtx5090
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/tem_ego_order1_2walls_full
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_multidoor_modelscore_agents_bmlgd11_rtx5090
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlgd11_checkpoint_train_EGO_order-0_model_checkpoint_seed_1 (mtime age ~ 13 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_ao852jp2_1 (mtime age ~ 32 days)
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/manual_alloc2026_5090_4137 (mtime age ~ 8 days)
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage4_wall_gru_latent_goal_seed123_rtx5090_1_n7
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_ego_tem_modes_staged_hairpin_ego_tem_delta_taylor3_temp0p050
+[2026-05-15 16:11:36] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/subtem_ego_fig3_grpi_like_5090 (mtime age ~ 10 days)
+[2026-05-15 16:11:36] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_smoke_hairpin_ego_tem
+[2026-05-15 16:11:37] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_ego_perf_follow_planner_wall_parity_rank01_v1hdmjmi_successor_feature_rtx5090_0 (mtime age ~ 29 days)
+[2026-05-15 16:11:37] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_bmlgd11_rtx5090_checkpoint_train_RNN_model_checkpoint_se_5_7b88ffb3
+[2026-05-15 16:11:37] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_8amvayla_1 (mtime age ~ 34 days)
+[2026-05-15 16:11:37] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_ijr952k5_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:37] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_cd73xkbk_1 (mtime age ~ 34 days)
+[2026-05-15 16:11:37] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_imfr1q6j_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:37] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_staged_hairpin_ego_tem_temp0p075
+[2026-05-15 16:11:37] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/sym_mppi_alloc2026_5090_v2_4129 (mtime age ~ 9 days)
+[2026-05-15 16:11:37] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_correct_p0a_gd11_r3
+[2026-05-15 16:11:37] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_uygullbq_0 (mtime age ~ 31 days)
+[2026-05-15 16:11:37] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_wall_rtx5090_pix8b054_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:37] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage3_pointmaze_rtx5090_mb55pee5_1 (mtime age ~ 33 days)
+[2026-05-15 16:11:37] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_wall_rtx5090_1775735891 (mtime age ~ 35 days)
+[2026-05-15 16:11:37] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage2_pointmaze_rtx5090_0a67tpof_1 (mtime age ~ 31 days)
+[2026-05-15 16:11:37] Summary: checked=142, delete_candidates=142, deleted=0, skipped_by_filter=40
+== bmlgs1 ==
+[2026-05-15 07:11:53] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_rtx2080_lstm_999 (mtime age ~ 9 days)
+[2026-05-15 07:11:54] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/rebalance_alloc42_2080_4147 (mtime age ~ 9 days)
+[2026-05-15 07:11:54] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_999_4053 (mtime age ~ 9 days)
+[2026-05-15 07:11:54] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_lstm_2026_4057 (mtime age ~ 9 days)
+[2026-05-15 07:11:54] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_floating_eval_lane4_transfer_full_train_eval_Transformer_sf__1_865a93ae
+[2026-05-15 07:11:54] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/sym_mppi_gru2026_2080_v3_4136 (mtime age ~ 9 days)
+[2026-05-15 07:11:54] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/rebalance_ungated999_2080_4146 (mtime age ~ 9 days)
+[2026-05-15 07:11:54] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/round_ego_sf_l2_seed123_2080_4180 (mtime age ~ 8 days)
+[2026-05-15 07:11:54] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_123_4045 (mtime age ~ 9 days)
+[2026-05-15 07:11:54] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_999_4060 (mtime age ~ 9 days)
+[2026-05-15 07:11:55] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_lstm_999_4029 (mtime age ~ 9 days)
+[2026-05-15 07:11:55] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_42_4058 (mtime age ~ 9 days)
+[2026-05-15 07:11:55] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_lstm_2026_4064 (mtime age ~ 9 days)
+[2026-05-15 07:11:55] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_bmlgs1_rtx2080_recovery_lane2_transfer_full_train_eval_RNN_sf_l2_seed2_1_61e472c6
+[2026-05-15 07:11:55] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_manual_tail_lane3_transfer_full_train_eval_Conv_sf_l2_seed_1_1cef7b61
+[2026-05-15 07:11:55] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_42_4051 (mtime age ~ 9 days)
+[2026-05-15 07:11:56] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/sym_repair_gru2026_2080_v2_4128 (mtime age ~ 9 days)
+[2026-05-15 07:11:56] Skipping [workcache] by filter: /scratch/heejun/workcache/941416b1fb3ebce6612c04f1ab1b7e773563b2dd4a301ea0543f2c243768311a
+[2026-05-15 07:11:56] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_repatch_lane1_transfer_full_train_eval_LSTM_sf_l2_seed2026_1_cc7cd5bf
+[2026-05-15 07:11:56] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_floating_eval_lane2_transfer_full_train_eval_LSTM_sf_l2_seed_1_cc7cd5bf
+[2026-05-15 07:11:56] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_floating_eval_lane2_transfer_full_train_eval_EGO_w_o_gating__1_19b043ce
+[2026-05-15 07:11:56] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_2026_4061 (mtime age ~ 9 days)
+[2026-05-15 07:11:56] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_oracle_cost_seed4_sweep_wall_transfer_euclidean_1 (mtime age ~ 9 days)
+[2026-05-15 07:11:56] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/rebalance_order1_2026_2080_4151 (mtime age ~ 8 days)
+[2026-05-15 07:11:56] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_floating_eval_lane9_wall_ablation_eval_EGO_order-1_sf_l2_see_1_961b6f8a
+[2026-05-15 07:11:56] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_floating_eval_lane14_transfer_full_train_eval_GRU_latent_l2_s_1_f1642905
+[2026-05-15 07:11:56] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_manual_tail_lane5_transfer_full_train_eval_Conv_sf_l2_seed_1_a47fbaa8
+[2026-05-15 07:11:56] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_floating_eval_lane12_transfer_full_train_eval_Transformer_sf__1_e66278a8
+[2026-05-15 07:11:57] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/rebalance_order1_123_2080_4143 (mtime age ~ 9 days)
+[2026-05-15 07:11:57] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/sym_repair_gru2026_2080_v2_4131 (mtime age ~ 9 days)
+[2026-05-15 07:11:57] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_999_4033 (mtime age ~ 9 days)
+[2026-05-15 07:11:57] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_smoke_hairpin_grpi_taylor3
+[2026-05-15 07:11:57] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_floating_eval_lane2_transfer_full_train_eval_RNN_sf_l2_seed2_1_61e472c6
+[2026-05-15 07:11:57] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_rtx2080_lstm_123 (mtime age ~ 9 days)
+[2026-05-15 07:11:57] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_oracle_cost_seed4_sweep_wall_geodesic_1 (mtime age ~ 9 days)
+[2026-05-15 07:11:57] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_floating_eval_lane4_transfer_full_train_eval_EGO_w_o_egocent_1_2ddb4908
+[2026-05-15 07:11:57] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_lstm_2026_4030 (mtime age ~ 9 days)
+[2026-05-15 07:11:57] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_lstm_123_4065 (mtime age ~ 9 days)
+[2026-05-15 07:11:57] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_lstm_123_4048 (mtime age ~ 9 days)
+[2026-05-15 07:11:57] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_floating_eval_lane11_wall_ablation_eval_EGO_w_o_gating_sf_l2__1_b877c0f3
+[2026-05-15 07:11:58] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_rtx2080_lstm_2026 (mtime age ~ 9 days)
+[2026-05-15 07:11:58] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/sym_mppi_gru2026_2080_v3_4133 (mtime age ~ 9 days)
+[2026-05-15 07:11:58] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_floating_eval_lane0_transfer_full_train_eval_LSTM_latent_l2__1_f2b28ebd
+[2026-05-15 07:11:58] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/manual_gru2026_2080_4139 (mtime age ~ 8 days)
+[2026-05-15 07:11:58] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_42_4044 (mtime age ~ 9 days)
+[2026-05-15 07:11:58] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_smoke_hairpin_ego_tem
+[2026-05-15 07:11:58] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_lstm_2026_4067 (mtime age ~ 9 days)
+[2026-05-15 07:11:58] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_auto_rtx2080_floating_eval_lane11_transfer_full_train_eval_Transformer_sf__1_865a93ae
+[2026-05-15 07:11:59] Keeping [workcache]: /scratch/jmme425/workcache/7cf0b06ed742ed40b401826b0933726fcacc22ea8af71897c68a532b6c1c063b_4446 (mtime age ~ 1 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/jmme425/workcache/7cf0b06ed742ed40b401826b0933726fcacc22ea8af71897c68a532b6c1c063b_4444 (mtime age ~ 1 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/jmme425/workcache/7cf0b06ed742ed40b401826b0933726fcacc22ea8af71897c68a532b6c1c063b_4445 (mtime age ~ 1 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_testidx_1_4405 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_6_4330 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_testidx_2_4366 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_4406 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_1_4326 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_4_4329 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_1_4359 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_1_4321 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_5_4363 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_2_4360 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_3_4328 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_4_4319 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_2_4332 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_1_4331 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_3_4318 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_3_4361 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_6_4364 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_1_4316 (mtime age ~ 5 days)
+[2026-05-15 07:12:00] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_6_4320 (mtime age ~ 5 days)
+[2026-05-15 07:12:01] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_2_4322 (mtime age ~ 5 days)
+[2026-05-15 07:12:01] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_testidx_1_4365 (mtime age ~ 5 days)
+[2026-05-15 07:12:01] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_4_4362 (mtime age ~ 5 days)
+[2026-05-15 07:12:01] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_testidx_1_4404 (mtime age ~ 5 days)
+[2026-05-15 07:12:01] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/5f2147b2fc28a3943ba0b415884bcc0c19644817f799ed88230528c8b7f6e86a
+[2026-05-15 07:12:01] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_2_4327 (mtime age ~ 5 days)
+[2026-05-15 07:12:01] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_2_4317 (mtime age ~ 5 days)
+[2026-05-15 07:12:04] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_4212 (mtime age ~ 8 days)
+[2026-05-15 07:12:04] Keeping [workcache]: /scratch/chamjin/workcache/cdd9981e682f8aae86336704a3c6ff90657a50d2cae67aa1c2282f1cacf51588_4529 (mtime age ~ 1 days)
+[2026-05-15 07:12:05] Keeping [workcache]: /scratch/chamjin/workcache/cdd9981e682f8aae86336704a3c6ff90657a50d2cae67aa1c2282f1cacf51588_4439 (mtime age ~ 2 days)
+[2026-05-15 07:12:09] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_4172 (mtime age ~ 8 days)
+[2026-05-15 07:12:09] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3676 (mtime age ~ 10 days)
+[2026-05-15 07:12:09] Keeping [workcache]: /scratch/chamjin/workcache/cdd9981e682f8aae86336704a3c6ff90657a50d2cae67aa1c2282f1cacf51588_23 (mtime age ~ 0 days)
+[2026-05-15 07:12:09] Keeping [workcache]: /scratch/chamjin/workcache/cdd9981e682f8aae86336704a3c6ff90657a50d2cae67aa1c2282f1cacf51588_4443 (mtime age ~ 2 days)
+[2026-05-15 07:12:15] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_4178 (mtime age ~ 8 days)
+[2026-05-15 07:12:15] Keeping [workcache]: /scratch/chamjin/workcache/cdd9981e682f8aae86336704a3c6ff90657a50d2cae67aa1c2282f1cacf51588_4438 (mtime age ~ 2 days)
+[2026-05-15 07:12:15] Keeping [workcache]: /scratch/chamjin/workcache/cdd9981e682f8aae86336704a3c6ff90657a50d2cae67aa1c2282f1cacf51588_4440 (mtime age ~ 2 days)
+[2026-05-15 07:12:19] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_4211 (mtime age ~ 8 days)
+[2026-05-15 07:12:20] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_4201 (mtime age ~ 8 days)
+[2026-05-15 07:12:23] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_4200 (mtime age ~ 8 days)
+[2026-05-15 07:12:23] Keeping [workcache]: /scratch/chamjin/workcache/cdd9981e682f8aae86336704a3c6ff90657a50d2cae67aa1c2282f1cacf51588_4442 (mtime age ~ 2 days)
+[2026-05-15 07:12:27] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_4173 (mtime age ~ 8 days)
+[2026-05-15 07:12:27] Keeping [workcache]: /scratch/chamjin/workcache/cdd9981e682f8aae86336704a3c6ff90657a50d2cae67aa1c2282f1cacf51588_4441 (mtime age ~ 2 days)
+[2026-05-15 07:12:29] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_4202 (mtime age ~ 8 days)
+[2026-05-15 07:12:29] Keeping [workcache]: /scratch/chamjin/workcache/cdd9981e682f8aae86336704a3c6ff90657a50d2cae67aa1c2282f1cacf51588_4530 (mtime age ~ 1 days)
+[2026-05-15 07:12:29] Keeping [workcache]: /scratch/chamjin/workcache/cdd9981e682f8aae86336704a3c6ff90657a50d2cae67aa1c2282f1cacf51588_22 (mtime age ~ 0 days)
+[2026-05-15 07:12:32] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_4203 (mtime age ~ 8 days)
+[2026-05-15 07:12:32] Keeping [workcache]: /scratch/chamjin/workcache/cdd9981e682f8aae86336704a3c6ff90657a50d2cae67aa1c2282f1cacf51588_21 (mtime age ~ 0 days)
+[2026-05-15 07:12:32] Summary: checked=278, delete_candidates=206, deleted=0, skipped_by_filter=81
+== bmlgs2 ==
+[2026-05-15 07:12:33] Starting scratch cleanup
+[2026-05-15 07:12:33] SCRATCH_ROOT=/scratch, FSTYPE=ext4, MOUNT_OPTIONS=rw,relatime
+[2026-05-15 07:12:33] INACTIVE_DAYS=7, AGE_FIELD=mtime, DRY_RUN=1
+[2026-05-15 07:12:33] CLEAN_REGULAR_JOB_DIRS=1, CLEAN_WORKCACHE_JOB_DIRS=1
+[2026-05-15 07:12:33] REGULAR_INCLUDE_REGEX='^[0-9]+$', REGULAR_EXCLUDE_REGEX='^(lost\+found|envcache|workcache)$'
+[2026-05-15 07:12:33] WORKCACHE_INCLUDE_REGEX='.*_[0-9]+$', WORKCACHE_EXCLUDE_REGEX='^(lost\+found)$'
+[2026-05-15 07:12:33] Scanning regular job directories
+[2026-05-15 07:12:33] Skipping [regular] by filter: /scratch/heejun/workcache
+[2026-05-15 07:12:33] Skipping [regular] by filter: /scratch/heejun/datasetcache
+[2026-05-15 07:12:33] Skipping [regular] by filter: /scratch/heejun/envcache
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4387 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4381 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4394 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4368 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4382 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4325 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4388 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4370 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Skipping [regular] by filter: /scratch/seokwonhan/workcache
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4301 (mtime age ~ 6 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4384 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4391 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4335 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4334 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4395 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4369 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4367 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4386 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4389 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4323 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4324 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4383 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4393 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4302 (mtime age ~ 6 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4303 (mtime age ~ 6 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4333 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4390 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4392 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Keeping [regular]: /scratch/seokwonhan/4385 (mtime age ~ 5 days)
+[2026-05-15 07:12:33] Scanning workcache job directories
+[2026-05-15 07:12:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_lstm_2026_bmlgs2_4169 (mtime age ~ 9 days)
+[2026-05-15 07:12:33] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_999_bmlgs2_4167 (mtime age ~ 9 days)
+[2026-05-15 07:12:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_42_bmlgs2_4166 (mtime age ~ 9 days)
+[2026-05-15 07:12:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_2026_bmlgs2_4165 (mtime age ~ 9 days)
+[2026-05-15 07:12:34] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage5_wall_ego_sf_l2_seed4_bayes_sweep
+[2026-05-15 07:12:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_lstm_123_bmlgs2_4168 (mtime age ~ 9 days)
+[2026-05-15 07:12:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_lstm_999_bmlgs2_4171 (mtime age ~ 9 days)
+[2026-05-15 07:12:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_lstm_42_bmlgs2_4170 (mtime age ~ 9 days)
+[2026-05-15 07:12:34] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_transfer_symmetric_mppi_conv_ar_123_bmlgs2_4164 (mtime age ~ 9 days)
+[2026-05-15 07:12:34] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_6_4325 (mtime age ~ 5 days)
+[2026-05-15 07:12:34] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_testidx_3_4367 (mtime age ~ 5 days)
+[2026-05-15 07:12:34] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_testidx_6_4370 (mtime age ~ 5 days)
+[2026-05-15 07:12:34] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_3_4333 (mtime age ~ 5 days)
+[2026-05-15 07:12:34] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_4_4334 (mtime age ~ 5 days)
+[2026-05-15 07:12:34] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_3_4323 (mtime age ~ 5 days)
+[2026-05-15 07:12:34] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_4_4324 (mtime age ~ 5 days)
+[2026-05-15 07:12:34] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b
+[2026-05-15 07:12:34] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_sub_6_4335 (mtime age ~ 5 days)
+[2026-05-15 07:12:34] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_testidx_4_4368 (mtime age ~ 5 days)
+[2026-05-15 07:12:34] Keeping [workcache]: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b_testidx_5_4369 (mtime age ~ 5 days)
+[2026-05-15 07:12:34] Summary: checked=46, delete_candidates=8, deleted=0, skipped_by_filter=6
+== bmlgs4 ==
+[2026-05-15 16:13:32] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3099 (mtime age ~ 19 days)
+[2026-05-15 16:13:32] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2945 (mtime age ~ 22 days)
+[2026-05-15 16:13:32] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3165 (mtime age ~ 18 days)
+[2026-05-15 16:13:32] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2980 (mtime age ~ 21 days)
+[2026-05-15 16:13:32] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3161 (mtime age ~ 18 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3304 (mtime age ~ 15 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3440 (mtime age ~ 13 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3231 (mtime age ~ 16 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3148 (mtime age ~ 18 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3090 (mtime age ~ 19 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3492 (mtime age ~ 13 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2865 (mtime age ~ 23 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3121 (mtime age ~ 19 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2883 (mtime age ~ 23 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3204 (mtime age ~ 17 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2987 (mtime age ~ 21 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2940 (mtime age ~ 22 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3547 (mtime age ~ 13 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3158 (mtime age ~ 18 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3270 (mtime age ~ 15 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2995 (mtime age ~ 21 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3222 (mtime age ~ 16 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3000 (mtime age ~ 21 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3088 (mtime age ~ 20 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2977 (mtime age ~ 22 days)
+[2026-05-15 16:13:33] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3091 (mtime age ~ 20 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3181 (mtime age ~ 17 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3230 (mtime age ~ 16 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2959 (mtime age ~ 22 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3323 (mtime age ~ 14 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3157 (mtime age ~ 18 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3172 (mtime age ~ 18 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2898 (mtime age ~ 23 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2985 (mtime age ~ 21 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2979 (mtime age ~ 21 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3521 (mtime age ~ 13 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3129 (mtime age ~ 18 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3162 (mtime age ~ 18 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3221 (mtime age ~ 16 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3163 (mtime age ~ 18 days)
+[2026-05-15 16:13:34] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3173 (mtime age ~ 17 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2702 (mtime age ~ 25 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3260 (mtime age ~ 16 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3195 (mtime age ~ 17 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2988 (mtime age ~ 21 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3054 (mtime age ~ 20 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3239 (mtime age ~ 16 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3305 (mtime age ~ 15 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3016 (mtime age ~ 20 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3120 (mtime age ~ 19 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3558 (mtime age ~ 12 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2934 (mtime age ~ 22 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3302 (mtime age ~ 15 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3198 (mtime age ~ 17 days)
+[2026-05-15 16:13:36] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3150 (mtime age ~ 18 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2700 (mtime age ~ 25 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3244 (mtime age ~ 16 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3058 (mtime age ~ 20 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3203 (mtime age ~ 17 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3253 (mtime age ~ 16 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3548 (mtime age ~ 13 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3134 (mtime age ~ 18 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2946 (mtime age ~ 22 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3325 (mtime age ~ 14 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3199 (mtime age ~ 17 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2909 (mtime age ~ 22 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3301 (mtime age ~ 15 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3021 (mtime age ~ 21 days)
+[2026-05-15 16:13:38] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2955 (mtime age ~ 22 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3245 (mtime age ~ 16 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2884 (mtime age ~ 23 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2954 (mtime age ~ 22 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3017 (mtime age ~ 20 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3168 (mtime age ~ 18 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3212 (mtime age ~ 17 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2886 (mtime age ~ 23 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2952 (mtime age ~ 22 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3240 (mtime age ~ 16 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_4206 (mtime age ~ 8 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2963 (mtime age ~ 22 days)
+[2026-05-15 16:13:39] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3164 (mtime age ~ 18 days)
+[2026-05-15 16:13:41] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2699 (mtime age ~ 25 days)
+[2026-05-15 16:13:41] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2957 (mtime age ~ 22 days)
+[2026-05-15 16:13:41] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3055 (mtime age ~ 20 days)
+[2026-05-15 16:13:41] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3520 (mtime age ~ 13 days)
+[2026-05-15 16:13:41] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2936 (mtime age ~ 22 days)
+[2026-05-15 16:13:41] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_3303 (mtime age ~ 15 days)
+[2026-05-15 16:13:41] [DRY-RUN] Would delete [workcache]: /scratch/chamjin/workcache/e4f793c0a4cc660a86b07ab09be2862578e508c16ab16b40b048734c85df341b_2880 (mtime age ~ 23 days)
+[2026-05-15 16:13:41] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/0b21db9ec9f50df8bfdee01ee3e7133f0f6ed0646ad7dc3c223e6c395cc46555
+[2026-05-15 16:13:41] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/5f2147b2fc28a3943ba0b415884bcc0c19644817f799ed88230528c8b7f6e86a
+[2026-05-15 16:13:41] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/d2567be017bf2c13870e56763e0e64a981cbae3e71a8dd61e3a442ccaab2a3ed
+[2026-05-15 16:13:41] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/2c7f502099eb73a1fe444fe560a83c5d4fd11c580b788f324baae46e5a03829b
+[2026-05-15 16:13:41] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/729
+[2026-05-15 16:13:41] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/726
+[2026-05-15 16:13:41] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/731
+[2026-05-15 16:13:41] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/725
+[2026-05-15 16:13:41] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/728
+[2026-05-15 16:13:41] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/730
+[2026-05-15 16:13:41] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/727
+[2026-05-15 16:13:41] Summary: checked=757, delete_candidates=742, deleted=0, skipped_by_filter=173
+== bmlnx1 ==
+[2026-05-15 16:13:43] Keeping [regular]: /scratch/jmme425/4422 (mtime age ~ 3 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/2913 (mtime age ~ 22 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/3348 (mtime age ~ 15 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/1206 (mtime age ~ 49 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/488 (mtime age ~ 97 days)
+[2026-05-15 16:13:43] Keeping [regular]: /scratch/jmme425/4423 (mtime age ~ 3 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/1096 (mtime age ~ 57 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/863 (mtime age ~ 72 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/3441 (mtime age ~ 14 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/1002 (mtime age ~ 65 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/1141 (mtime age ~ 52 days)
+[2026-05-15 16:13:43] Keeping [regular]: /scratch/jmme425/4425 (mtime age ~ 3 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/791 (mtime age ~ 79 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/486 (mtime age ~ 97 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/1121 (mtime age ~ 54 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/3326 (mtime age ~ 15 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/780 (mtime age ~ 80 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/790 (mtime age ~ 79 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/1008 (mtime age ~ 63 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/2912 (mtime age ~ 22 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/835 (mtime age ~ 73 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/480 (mtime age ~ 97 days)
+[2026-05-15 16:13:43] Keeping [regular]: /scratch/jmme425/4416 (mtime age ~ 5 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/1100 (mtime age ~ 57 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/jmme425/2324 (mtime age ~ 31 days)
+[2026-05-15 16:13:43] Skipping [regular] by filter: /scratch/jhyang/workcache
+[2026-05-15 16:13:43] Skipping [regular] by filter: /scratch/jhyang/envcache
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1487 (mtime age ~ 41 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1388 (mtime age ~ 42 days)
+[2026-05-15 16:13:43] Skipping [regular] by filter: /scratch/heejun/workcache
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1385 (mtime age ~ 42 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1368 (mtime age ~ 42 days)
+[2026-05-15 16:13:43] Skipping [regular] by filter: /scratch/heejun/datasetcache
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1333 (mtime age ~ 43 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1281 (mtime age ~ 44 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1491 (mtime age ~ 41 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1560 (mtime age ~ 39 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1563 (mtime age ~ 39 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1623 (mtime age ~ 38 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1276 (mtime age ~ 44 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1275 (mtime age ~ 44 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1574 (mtime age ~ 39 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1342 (mtime age ~ 43 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1568 (mtime age ~ 39 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1294 (mtime age ~ 44 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1577 (mtime age ~ 39 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1273 (mtime age ~ 44 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1382 (mtime age ~ 42 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1443 (mtime age ~ 42 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1424 (mtime age ~ 42 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1485 (mtime age ~ 41 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1624 (mtime age ~ 38 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1494 (mtime age ~ 41 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1351 (mtime age ~ 42 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/3550 (mtime age ~ 13 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1421 (mtime age ~ 42 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/3539 (mtime age ~ 13 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1274 (mtime age ~ 44 days)
+[2026-05-15 16:13:43] [DRY-RUN] Would delete [regular]: /scratch/heejun/1339 (mtime age ~ 43 days)
+[2026-05-15 16:13:44] Skipping [regular] by filter: /scratch/heejun/envcache
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [regular]: /scratch/heejun/1571 (mtime age ~ 39 days)
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [regular]: /scratch/heejun/1428 (mtime age ~ 42 days)
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [regular]: /scratch/heejun/1292 (mtime age ~ 44 days)
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [regular]: /scratch/heejun/1373 (mtime age ~ 42 days)
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [regular]: /scratch/heejun/1391 (mtime age ~ 42 days)
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [regular]: /scratch/heejun/1394 (mtime age ~ 42 days)
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [regular]: /scratch/heejun/1397 (mtime age ~ 42 days)
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [regular]: /scratch/heejun/1565 (mtime age ~ 39 days)
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [regular]: /scratch/heejun/1356 (mtime age ~ 42 days)
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [regular]: /scratch/heejun/1431 (mtime age ~ 42 days)
+[2026-05-15 16:13:44] Skipping [regular] by filter: /scratch/jeongmin/workcache
+[2026-05-15 16:13:44] Keeping [regular]: /scratch/jeongmin/26 (mtime age ~ 0 days)
+[2026-05-15 16:13:44] Scanning workcache job directories
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/jungyoung/workcache/c662bac4445bc50a4754b1d1ff08a06817d84f6f1b4c03cd748093b991361711
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/seokwonhan/workcache/5f2147b2fc28a3943ba0b415884bcc0c19644817f799ed88230528c8b7f6e86a
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/jmme425/workcache/7cf0b06ed742ed40b401826b0933726fcacc22ea8af71897c68a532b6c1c063b
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage5_vram_ego_frozen_h200mig_0 (mtime age ~ 15 days)
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/heejun/workcache/wall_seed_correct_p0a_nx1_r3
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/subtem_vram_bench_20260505 (mtime age ~ 10 days)
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlnx1_transfer_zero_shot_EGO_w_o_egocentric_gating_sf_ru_2 (mtime age ~ 13 days)
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage5_vram_ego_operator_only_fine_tune_h200mig_0 (mtime age ~ 15 days)
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/heejun/workcache/generator_ego_tem_order1_hairpin_nx1_pair
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_ego_fig3_preflight
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/subtem_vram_factor_20260505 (mtime age ~ 10 days)
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/heejun/workcache/legacy_ego_hairpin_smoke
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/wall_seed_auto_bmlnx1_transfer_zero_shot_EGO_w_o_egocentric_gating_sf_ru_3 (mtime age ~ 13 days)
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/heejun/workcache/pointmaze_semantic_agent_bmlnx1_h200mig71_4agents
+[2026-05-15 16:13:44] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/ego_stage5_vram_ego_gate_only_fine_tune_h200mig_0 (mtime age ~ 15 days)
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_ego_fig3_current_nx1
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_staged_hairpin_ego_tem_temp1p000
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/heejun/workcache/edf36edba8b9fba2d4b4ec8d59db61ee97ea1180066274c5d478ddd71b84796f
+[2026-05-15 16:13:44] Skipping [workcache] by filter: /scratch/heejun/workcache/legacy_grpi_hairpin_smoke_pair
+[2026-05-15 16:13:45] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/rebalance_order1_42_h200mig_4142 (mtime age ~ 8 days)
+[2026-05-15 16:13:45] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_grpi_ablation_staged_hairpin_ego_tem_temp2p000
+[2026-05-15 16:13:45] Skipping [workcache] by filter: /scratch/heejun/workcache/ego_stage5_wall_ego_gate_only_fine_tune_seed42_h200mig_0_n4
+[2026-05-15 16:13:45] Skipping [workcache] by filter: /scratch/heejun/workcache/f81a1e93d0448107e5ac18bcd674a0cd066d6b429c1bdecb4d2609cdfab06842
+[2026-05-15 16:13:45] [DRY-RUN] Would delete [workcache]: /scratch/heejun/workcache/subtem_vram_bench_epoch_20260505 (mtime age ~ 10 days)
+[2026-05-15 16:13:45] Skipping [workcache] by filter: /scratch/heejun/workcache/subtem_ego_fig3_grpi_like_nx1
+[2026-05-15 16:13:45] Skipping [workcache] by filter: /scratch/jeongmin/workcache/596fcbffaad39b380638110a14b9073d0f21ff673ce60a27906aef526d738a39
+[2026-05-15 16:13:45] Summary: checked=127, delete_candidates=119, deleted=0, skipped_by_filter=27
