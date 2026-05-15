@@ -11,8 +11,10 @@ sys.path.append(str(ROOT))
 
 from test_smoke import (
     test_add_noise_output_shape,
+    test_auxiliary_losses_use_fps_and_stats,
     test_checkpoint_resume_rejects_incompatible_architecture,
     test_checkpoint_resume_preserves_best_val_and_scaler,
+    test_conditional_unet_mean_summary_backward_compat_output_shape,
     test_conditional_unet_denoiser_output_shape,
     test_csv_export_formatting,
     test_dataset_slicing,
@@ -34,10 +36,12 @@ def main() -> None:
     with TemporaryDirectory() as tmp:
         test_dataset_uses_mmap_and_returns_float32(Path(tmp))
     test_add_noise_output_shape()
+    test_auxiliary_losses_use_fps_and_stats()
     test_ddim_sampler_output_shape()
     test_ddim_sampler_output_shape_with_unet()
     test_ddim_sampler_external_xt_shape_check()
     test_conditional_unet_denoiser_output_shape()
+    test_conditional_unet_mean_summary_backward_compat_output_shape()
     test_transformer_denoiser_backward_compat_output_shape()
     test_reconstruct_joint_vel_uses_fps()
     test_reconstruct_joint_vel_single_frame()

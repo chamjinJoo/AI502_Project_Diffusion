@@ -30,7 +30,7 @@ training:
   grad_clip: 1.0
   velocity_loss_weight: 0.0
   quaternion_loss_weight: 0.0
-  checkpoint_dir: checkpoints/unet_pred_len10_flatcond
+  checkpoint_dir: checkpoints/transformer_pred_len10_fps120
   resume: true
   use_wandb: false
   device: cuda
@@ -43,12 +43,12 @@ diffusion:
   clip_sample: false
 
 model:
-  architecture: unet
+  architecture: transformer
   dim: 256
   num_layers: 4
   num_heads: 4
   dropout: 0.1
-  condition_encoder: transformer # encode previous frames for conditioning
+  condition_encoder: transformer
   condition_summary: flatten
   down_dims: [256, 512, 1024]
   kernel_size: 3

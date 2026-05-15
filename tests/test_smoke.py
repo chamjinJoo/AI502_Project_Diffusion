@@ -77,6 +77,24 @@ def test_add_noise_output_shape() -> None:
     assert xt.shape == (2, 3, 65)
 
 
+def test_auxiliary_losses_use_fps_and_stats() -> None:
+    diffusion = DiffusionSchedulerWrapper(ZeroDenoiser(), num_train_timesteps=8, beta_schedule="linear", fps=2.0)
+    diffusion.set_normalization_stats(torch.zeros(65), torch.ones(65))
+
+    x0 = torch.zeros(1, 3, 65)
+    x0[0, :, 0] = torch.tensor([0.0, 1.0, 3.0])
+    x0[0, :, 29] = torch.tensor([0.0, 2.0, 4.0])
+    x0[0, :, 58] = 1.0
+    assert float(diffusion.velocity_consistency_loss(x0)) == 0.0
+    assert float(diffusion.quaternion_unit_loss(x0)) == 0.0
+
+    cond = torch.zeros(1, 2, 65)
+    cond[0, -1, 0] = 1.0
+    cond[0, -1, 29] = 2.0
+    x0[:, 0, 0] = 2.0
+    assert float(diffusion.continuity_loss(x0, cond)) == 0.0
+
+
 def test_ddim_sampler_output_shape() -> None:
     sampler = DiffusionSchedulerWrapper(ZeroDenoiser(), num_train_timesteps=8, beta_schedule="linear")
     cond = torch.randn(2, 4, 65)
@@ -97,6 +115,7 @@ def test_ddim_sampler_output_shape_with_unet() -> None:
         condition_encoder="conv",
         architecture="unet",
         down_dims=(32, 64, 128),
+        condition_summary="flatten",
     )
     sampler = DiffusionSchedulerWrapper(model, num_train_timesteps=8, beta_schedule="linear")
     cond = torch.randn(2, 4, 65)
@@ -128,6 +147,7 @@ def test_conditional_unet_denoiser_output_shape() -> None:
         condition_encoder="conv",
         architecture="unet",
         down_dims=(32, 64, 128),
+        condition_summary="flatten",
     )
     xt = torch.randn(2, 10, 65)
     cond = torch.randn(2, 4, 65)
@@ -153,6 +173,27 @@ def test_transformer_denoiser_backward_compat_output_shape() -> None:
     timesteps = torch.tensor([0, 7], dtype=torch.long)
     out = model(xt, cond, timesteps)
     assert out.shape == (2, 3, 65)
+
+
+def test_conditional_unet_mean_summary_backward_compat_output_shape() -> None:
+    model = ConditionalDenoiser(
+        frame_dim=65,
+        history_len=4,
+        pred_len=10,
+        model_dim=32,
+        num_layers=1,
+        num_heads=4,
+        dropout=0.0,
+        condition_encoder="conv",
+        architecture="unet",
+        down_dims=(32, 64, 128),
+        condition_summary="mean",
+    )
+    xt = torch.randn(2, 10, 65)
+    cond = torch.randn(2, 4, 65)
+    timesteps = torch.tensor([0, 7], dtype=torch.long)
+    out = model(xt, cond, timesteps)
+    assert out.shape == (2, 10, 65)
 
 
 def test_reconstruct_joint_vel_uses_fps() -> None:

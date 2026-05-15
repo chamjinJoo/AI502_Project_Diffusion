@@ -91,10 +91,12 @@ class UnetDenoiser(nn.Module):
         kernel_size: int = 3,
         n_groups: int = 8,
         cond_predict_scale: bool = False,
+        condition_summary: str = "flatten",
     ) -> None:
         super().__init__()
-        del history_len, pred_len
+        del pred_len
         self.frame_dim = frame_dim
+        self.condition_summary_type = condition_summary
         self.condition_encoder = ConditionEncoder(
             frame_dim=frame_dim,
             model_dim=model_dim,
@@ -103,7 +105,18 @@ class UnetDenoiser(nn.Module):
             dropout=dropout,
             encoder_type=condition_encoder,
         )
-        self.cond_summary = nn.Sequential(nn.LayerNorm(model_dim), nn.Linear(model_dim, model_dim))
+        if condition_summary == "mean":
+            self.cond_summary = nn.Sequential(nn.LayerNorm(model_dim), nn.Linear(model_dim, model_dim))
+        elif condition_summary == "flatten":
+            self.cond_summary = nn.Sequential(
+                nn.Flatten(start_dim=1),
+                nn.Linear(history_len * model_dim, model_dim),
+                nn.LayerNorm(model_dim),
+                nn.SiLU(),
+                nn.Linear(model_dim, model_dim),
+            )
+        else:
+            raise ValueError("condition_summary must be 'mean' or 'flatten'")
         self.unet = ConditionalUnet1D(
             input_dim=frame_dim,
             global_cond_dim=model_dim,
@@ -126,7 +139,10 @@ class UnetDenoiser(nn.Module):
             Predicted noise with shape [B, K, 65].
         """
         cond_tokens = self.condition_encoder(cond)  # [B, H, D]
-        global_cond = self.cond_summary(cond_tokens.mean(dim=1))  # [B, D]
+        if self.condition_summary_type == "mean":
+            global_cond = self.cond_summary(cond_tokens.mean(dim=1))  # [B, D]
+        else:
+            global_cond = self.cond_summary(cond_tokens)  # [B, D]
         return self.unet(xt, timesteps, global_cond)  # [B, K, 65]
 
 
@@ -148,6 +164,7 @@ class ConditionalDenoiser(nn.Module):
         kernel_size: int = 3,
         n_groups: int = 8,
         cond_predict_scale: bool = False,
+        condition_summary: str = "flatten",
     ) -> None:
         super().__init__()
         if architecture == "transformer":
@@ -175,6 +192,7 @@ class ConditionalDenoiser(nn.Module):
                 kernel_size=kernel_size,
                 n_groups=n_groups,
                 cond_predict_scale=cond_predict_scale,
+                condition_summary=condition_summary,
             )
         else:
             raise ValueError(f"unknown denoiser architecture: {architecture}")

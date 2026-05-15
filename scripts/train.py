@@ -217,6 +217,7 @@ def main() -> None:
         kernel_size=int(model_cfg.get("kernel_size", 3)),
         n_groups=int(model_cfg.get("n_groups", 8)),
         cond_predict_scale=bool(model_cfg.get("cond_predict_scale", False)),
+        condition_summary=str(model_cfg.get("condition_summary", "flatten")),
     )
     diffusion_cfg = cfg["diffusion"]
     diffusion = DiffusionSchedulerWrapper(
@@ -227,7 +228,21 @@ def main() -> None:
         clip_sample=bool(diffusion_cfg["clip_sample"]),
         velocity_loss_weight=float(cfg["training"]["velocity_loss_weight"]),
         quaternion_loss_weight=float(cfg["training"]["quaternion_loss_weight"]),
+        continuity_loss_weight=float(cfg["training"].get("continuity_loss_weight", 0.0)),
+        fps=float(data_cfg.get("fps", 50.0)),
     )
+    diffusion.set_normalization_stats(torch.from_numpy(train_dataset.mean), torch.from_numpy(train_dataset.std))
+
+    init_checkpoint = cfg["training"].get("init_checkpoint")
+    checkpoint_dir = Path(cfg["training"]["checkpoint_dir"])
+    will_resume = bool(cfg["training"].get("resume", False)) and (checkpoint_dir / "latest.pt").exists()
+    if init_checkpoint and not will_resume:
+        try:
+            checkpoint = torch.load(init_checkpoint, map_location="cpu", weights_only=True)
+        except TypeError:
+            checkpoint = torch.load(init_checkpoint, map_location="cpu")
+        model.load_state_dict(checkpoint["model"])
+        print(f"[init] loaded model weights from {init_checkpoint}", flush=True)
     Trainer(diffusion, train_loader, val_loader, cfg).fit()
 
 

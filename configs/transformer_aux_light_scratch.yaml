@@ -28,27 +28,29 @@ training:
   lr: 0.0001
   weight_decay: 0.0001
   grad_clip: 1.0
-  velocity_loss_weight: 0.0
-  quaternion_loss_weight: 0.0
-  checkpoint_dir: checkpoints/unet_pred_len10_flatcond
-  resume: true
+  velocity_loss_weight: 0.0000001
+  quaternion_loss_weight: 0.00001
+  continuity_loss_weight: 0.0001
+  auxiliary_max_timestep: 200
+  checkpoint_dir: checkpoints/transformer_pred_len10_fps120_aux_light_scratch
+  resume: false
   use_wandb: false
   device: cuda
 
 diffusion:
   num_train_timesteps: 1000
-  num_inference_steps: 20
+  num_inference_steps: 50
   beta_schedule: squaredcos_cap_v2
   prediction_type: epsilon
   clip_sample: false
 
 model:
-  architecture: unet
+  architecture: transformer
   dim: 256
   num_layers: 4
   num_heads: 4
   dropout: 0.1
-  condition_encoder: transformer # encode previous frames for conditioning
+  condition_encoder: transformer
   condition_summary: flatten
   down_dims: [256, 512, 1024]
   kernel_size: 3

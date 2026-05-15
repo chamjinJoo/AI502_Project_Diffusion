@@ -29,6 +29,8 @@ class DiffusionSchedulerWrapper(nn.Module):
         clip_sample: bool = False,
         velocity_loss_weight: float = 0.0,
         quaternion_loss_weight: float = 0.0,
+        continuity_loss_weight: float = 0.0,
+        fps: float = 50.0,
     ) -> None:
         super().__init__()
         if prediction_type != "epsilon":
@@ -36,12 +38,29 @@ class DiffusionSchedulerWrapper(nn.Module):
         self.model = model
         self.velocity_loss_weight = velocity_loss_weight
         self.quaternion_loss_weight = quaternion_loss_weight
+        self.continuity_loss_weight = continuity_loss_weight
+        self.fps = float(fps)
+        self.register_buffer("norm_mean", torch.empty(0), persistent=False)
+        self.register_buffer("norm_std", torch.empty(0), persistent=False)
         self.scheduler = DDIMScheduler(
             num_train_timesteps=num_train_timesteps,
             beta_schedule=_diffusers_beta_schedule(beta_schedule),
             prediction_type=prediction_type,
             clip_sample=clip_sample,
         )
+
+    def set_normalization_stats(self, mean: torch.Tensor, std: torch.Tensor) -> None:
+        """Store z-score stats so auxiliary losses can run in physical units."""
+        self.norm_mean = mean.float().view(1, 1, -1)
+        self.norm_std = std.float().view(1, 1, -1).clamp_min(1e-6)
+
+    def _denormalize_if_available(self, chunk: torch.Tensor) -> torch.Tensor:
+        """Convert normalized [B, T, 65] chunks back to tracking-reference units."""
+        if self.norm_mean.numel() == chunk.shape[-1] and self.norm_std.numel() == chunk.shape[-1]:
+            mean = self.norm_mean.to(device=chunk.device, dtype=chunk.dtype)
+            std = self.norm_std.to(device=chunk.device, dtype=chunk.dtype)
+            return chunk * std + mean
+        return chunk
 
     def _move_scheduler_tensors(self, device: torch.device, dtype: torch.dtype) -> None:
         """Move scheduler tensors because diffusers schedulers are not nn.Modules."""
@@ -86,18 +105,35 @@ class DiffusionSchedulerWrapper(nn.Module):
         return (xt - torch.sqrt(1.0 - alpha_t) * eps) / torch.sqrt(alpha_t).clamp_min(1e-8)  # [B, K, 65]
 
     def velocity_consistency_loss(self, x0_pred: torch.Tensor) -> torch.Tensor:
-        """Compare predicted joint_vel to finite differences of predicted joint_pos."""
+        """Compare joint_vel to finite differences of joint_pos in physical units."""
         if x0_pred.shape[1] < 2:
             return x0_pred.new_tensor(0.0)
+        x0_pred = self._denormalize_if_available(x0_pred)
         joint_pos = x0_pred[:, :, :29]  # [B, K, 29]
         joint_vel = x0_pred[:, :, 29:58]  # [B, K, 29]
-        finite_diff = joint_pos[:, 1:] - joint_pos[:, :-1]  # [B, K-1, 29]
-        return F.mse_loss(joint_vel[:, 1:], finite_diff)
+        finite_diff = (joint_pos[:, 1:] - joint_pos[:, :-1]) * self.fps  # [B, K-1, 29]
+        return F.smooth_l1_loss(joint_vel[:, 1:], finite_diff)
 
     def quaternion_unit_loss(self, x0_pred: torch.Tensor) -> torch.Tensor:
         """Encourage body_quat(w, x, y, z) to have unit norm."""
+        x0_pred = self._denormalize_if_available(x0_pred)
         quat = x0_pred[:, :, 58:62]  # [B, K, 4]
         return ((quat.norm(dim=-1) - 1.0) ** 2).mean()
+
+    def continuity_loss(self, x0_pred: torch.Tensor, cond: torch.Tensor) -> torch.Tensor:
+        """Encourage the first predicted frame to continue from the history."""
+        x0_pred = self._denormalize_if_available(x0_pred)
+        cond = self._denormalize_if_available(cond)
+
+        last = cond[:, -1]  # [B, 65]
+        expected_joint_pos = last[:, :29] + last[:, 29:58] / self.fps  # [B, 29]
+        loss = F.smooth_l1_loss(x0_pred[:, 0, :29], expected_joint_pos)
+
+        if cond.shape[1] >= 2:
+            root_delta = cond[:, -1, 62:65] - cond[:, -2, 62:65]  # [B, 3]
+            expected_body_pos = cond[:, -1, 62:65] + root_delta  # [B, 3]
+            loss = loss + 0.1 * F.smooth_l1_loss(x0_pred[:, 0, 62:65], expected_body_pos)
+        return loss
 
     @torch.no_grad()
     def sample(

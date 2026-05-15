@@ -1,9 +1,192 @@
-# Conditional DDIM Planner
+# Conditional DDIM Humanoid Motion Planner
 
-Minimal PyTorch research code for a history-conditioned DDIM planner that predicts humanoid future motion chunks directly in GR00T tracking-reference space. The diffusion core uses Hugging Face `diffusers.DDIMScheduler` with a conditional denoiser from [DiffusionPolicy-`ConditionalUnet1D`](https://github.com/real-stanford/diffusion_policy).
+Minimal PyTorch research code for a history-conditioned diffusion planner that predicts future humanoid tracking references directly in GR00T/IsaacLab-compatible motion space.
 
-This is not a text-to-motion model. It does not use language encoders, SMPL, action decoders, or robotics framework dependencies.
+## Representation
 
+Every motion frame is a fixed 65-dimensional vector:
+
+```text
+[ joint_pos(29), joint_vel(29), body_quat(4), body_pos(3) ]
+```
+
+- `joint_pos`: 29 Unitree G1 / IsaacLab-order joint positions
+- `joint_vel`: 29 matching joint velocities
+- `body_quat`: root orientation quaternion in `(w, x, y, z)`
+- `body_pos`: root position `(x, y, z)`
+
+Each processed training sequence is saved as:
+
+```text
+[T, 65]
+```
+
+For history length `H=20` and prediction horizon `K=10`, a training sample is:
+
+```text
+cond   = sequence[t-H+1 : t+1]   # [20, 65]
+target = sequence[t+1   : t+1+K] # [10, 65]
+```
+
+At inference time the diffusion planner takes:
+
+```text
+cond  # previous motion history, [H, 65]
+x_T   # initial future noise, [K, 65] or [B, K, 65]
+```
+
+`x_T` is sampled from standard Gaussian noise by default. It can also be supplied with `--x_T`, which is the intended hook for future steering-policy integration.
+
+## Dataset Source
+
+The current preprocessing pipeline targets **BONES-SEED**, specifically the **Unitree G1 MuJoCo-compatible CSV trajectories**.
+
+Primary sources:
+
+- BONES-SEED Hugging Face dataset: https://huggingface.co/datasets/bones-studio/seed
+- BONES-SEED dataset page: https://bones.studio/datasets/seed
+- BONES-SEED license page: https://bones.studio/info/seed-license
+
+The source dataset provides Unitree G1-compatible motion CSV paths such as `move_g1_mujoco_path`. This project does not use the source files directly during training. Instead, it converts valid source clips into internal `.npy` arrays under:
+
+```text
+processed_dataset/
+  sequences/*.npy
+  manifests/*.jsonl
+  stats/
+  reports/
+```
+
+The converter inspects actual CSV columns and maps them into the fixed 65D representation:
+
+```text
+29 joint DOF columns -> joint_pos
+missing joint_vel    -> finite-difference joint_pos when allowed
+root Euler rotation  -> body_quat(w, x, y, z)
+root translation     -> body_pos
+```
+
+Current preprocessing assumptions are in [configs/dataset_build.yaml](configs/dataset_build.yaml):
+
+```yaml
+target_fps: 50
+assume_fps_if_missing: 120
+source_joint_unit: degrees
+source_root_pos_unit: centimeters
+source_root_euler_unit: degrees
+dataset_category: locomotion
+allow_joint_vel_fallback: true
+allow_body_pos_zero_fallback: false
+allow_body_quat_identity_debug_fallback: false
+```
+
+Important: root position and root orientation are not silently fabricated. Clips missing required root fields are skipped. Joint velocity may be reconstructed from finite differences because many source CSVs provide joint position but not velocity.
+
+## Dataset Build
+
+Inspect source schemas:
+
+```bash
+python data_prep/inspect_sources.py --config configs/dataset_build.yaml
+```
+
+Build processed `[T, 65]` sequences, train/val manifests, stats, and reports:
+
+```bash
+python data_prep/build_dataset.py --config configs/dataset_build.yaml
+```
+
+Force rebuild after changing FPS/unit assumptions:
+
+```bash
+python data_prep/build_dataset.py \
+  --config configs/dataset_build.yaml \
+  --force_rebuild
+```
+
+Run sanity checks:
+
+```bash
+python data_prep/sanity_check.py --config configs/dataset_build.yaml
+```
+
+Training uses:
+
+```text
+processed_dataset/manifests/train_manifest.jsonl
+processed_dataset/manifests/val_manifest.jsonl
+processed_dataset/stats/stats.json
+```
+
+## Diffusion Model Source
+
+The diffusion process uses Hugging Face **diffusers**:
+
+- `diffusers.DDIMScheduler`: https://huggingface.co/docs/diffusers/api/schedulers/ddim
+
+The model is trained with epsilon prediction:
+
+```text
+eps_hat = model(xt, timestep, cond)
+loss    = MSE(eps_hat, eps)
+```
+
+During inference, deterministic DDIM sampling is used with `eta=0`.
+
+This repository provides two denoiser backbones behind the same interface:
+
+```text
+model(xt [B, K, 65], cond [B, H, 65], timestep [B]) -> eps_hat [B, K, 65]
+```
+
+### 1. Diffusion Policy Style ConditionalUnet1D
+
+The U-Net denoiser in [models/conditional_unet1d.py](models/conditional_unet1d.py) is adapted from the public Diffusion Policy `ConditionalUnet1D` design:
+
+- Diffusion Policy repository: https://github.com/real-stanford/diffusion_policy
+- Diffusion Policy paper: https://arxiv.org/abs/2303.04137
+
+This project does not import Diffusion Policy as a dependency. The implementation is simplified and adapted for `[B, K, 65]` humanoid tracking-reference chunks instead of action sequences from the original robotics manipulation setting.
+
+Default config:
+
+```yaml
+model:
+  architecture: unet
+  condition_encoder: transformer
+  condition_summary: flatten
+  down_dims: [256, 512, 1024]
+```
+
+### 2. Transformer Baseline
+
+The Transformer denoiser in [models/denoiser.py](models/denoiser.py) is a small project-local baseline. It uses:
+
+- target-token projection for noisy future chunks
+- timestep embedding
+- condition history encoder
+- temporal Transformer encoder over future tokens
+
+It is selected with:
+
+```yaml
+model:
+  architecture: transformer
+```
+
+The currently useful baseline/checkpoint family is Transformer-based:
+
+```text
+configs/transformer_baseline.yaml
+checkpoints/transformer_pred_len10_fps120/
+```
+
+Auxiliary-loss scratch training for smoother tracking references uses:
+
+```text
+configs/transformer_aux_light_scratch.yaml
+checkpoints/transformer_pred_len10_fps120_aux_light_scratch/
+```
 
 ## Requirements
 
@@ -16,271 +199,97 @@ NumPy 2.4.4
 diffusers 0.38.0
 ```
 
-Install an equivalent Python environment with PyTorch, NumPy, PyYAML, and
-Hugging Face diffusers available.
-
-## Representation
-
-Each frame is a 65-dimensional vector:
-
-```text
-[ joint_pos(29), joint_vel(29), body_quat(4), body_pos(3) ]
-```
-
-`body_quat` is ordered as `(w, x, y, z)`. Each `.npy` training sequence must have shape `[T, 65]`.
-
-For history length `H=20` and prediction horizon `K=10`, samples are:
-
-```text
-cond   = sequence[t-H+1 : t+1]   # [H, 65]
-target = sequence[t+1   : t+1+K] # [K, 65]
-```
-
-The diffusion model has two runtime inputs:
-
-```text
-cond  # previous motion history, [H, 65]
-x_T   # initial future-chunk noise, [K, 65] or [B, K, 65]
-```
-
-`cond` is the last `H` tracking-reference frames. Each condition frame uses the same 65-dimensional layout:
-
-```text
-[ joint_pos(29), joint_vel(29), body_quat(4), body_pos(3) ]
-```
-
-At inference time, `scripts/sample.py` accepts either an exact `[H, 65]`
-condition array or a longer `[T, 65]` sequence. If a longer sequence is given,
-the script uses the last `H` frames as the condition. This history is normalized
-with the training statistics before being passed to the model.
-
-`x_T` is the noisy initial future chunk for DDIM sampling. By default it is
-sampled from standard Gaussian noise with shape `[K, 65]` per sample. It may
-also be supplied explicitly with `--x_T`, which is the hook for later steering
-policies. The model then denoises this latent into a future chunk:
-
-```text
-output = predicted future motion chunk  # [K, 65]
-```
-
-The default denoiser is configured with:
-
-```yaml
-model:
-  architecture: unet
-  down_dims: [256, 512, 1024]
-```
-
-This keeps the same project interface as the earlier Transformer baseline:
-`model(xt, cond, timestep) -> eps_hat`, all shaped in normalized `[B, K, 65]`
-diffusion space. Older checkpoints that do not contain `model.architecture`
-are still treated as Transformer-denoiser checkpoints by the sampling script.
-
-
-## Dataset
-
-This project currently uses BONES-SEED as the source motion corpus, specifically
-the Unitree G1 MuJoCo-compatible CSV trajectories.
-
-Sources:
-
-- Hugging Face dataset: https://huggingface.co/datasets/bones-studio/seed
-- Bones Studio dataset page: https://bones.studio/datasets/seed
-
-The local preprocessing pipeline converts source CSV clips into training-ready
-internal arrays under `processed_dataset/`. Each processed sequence is stored as
-one `.npy` file shaped `[T, 65]` using this fixed layout:
-
-```text
-[ joint_pos(29), joint_vel(29), body_quat(4), body_pos(3) ]
-```
-
-For the BONES-SEED G1 CSV files used here, the observed source fields include
-root translation, root Euler rotation, and 29 joint DOF columns. The converter
-maps them as follows:
-
-```text
-29 joint DOF columns       -> joint_pos, converted to radians
-finite-difference position -> joint_vel, when velocity columns are absent
-root Euler rotation        -> body_quat in (w, x, y, z)
-root translation           -> body_pos
-```
-
-The current processed dataset contains:
-
-```text
-processed_dataset/sequences/*.npy              61106 clips
-processed_dataset/manifests/train_manifest.jsonl 54995 clips
-processed_dataset/manifests/val_manifest.jsonl    6111 clips
-processed_dataset/stats/stats.json             normalization stats
-processed_dataset/reports/                     preprocessing audit reports
-```
-
-The dataset builder is strict by default: clips missing required root quaternion,
-root position, or fps metadata are skipped rather than silently filled with
-fabricated values. Joint velocity may be reconstructed from finite differences
-when configured, and skip reasons are written to
-`processed_dataset/reports/conversion_report.json`.
+Install an equivalent Python environment with PyTorch, NumPy, PyYAML, and Hugging Face diffusers.
 
 ## Train
 
-Scan a directory for valid `[T, 65]` files:
-
-```bash
-python scripts/preprocess_dataset.py --data_dir data/raw --output data/motion_files.json
-```
-
-Compute normalization stats before training:
-
-```bash
-python scripts/compute_stats.py \
-  --file_list data/motion_files.json \
-  --output checkpoints/normalization_stats.json
-```
-
-Edit `configs/default.yaml` so `data.train_paths` points to your `.npy` files, then run:
+Train the default U-Net configuration:
 
 ```bash
 python scripts/train.py --config configs/default.yaml
 ```
 
-With the default config, checkpoints are written to
-`checkpoints/unet_pred_len10/latest.pt` and
-`checkpoints/unet_pred_len10/best.pt`. Normalization stats are loaded from
-`data.stats_path`.
+Train the Transformer baseline:
 
-Instead of listing every file in YAML, you can set:
-
-```yaml
-data:
-  train_file_list: data/motion_files.json
-  val_file_list:
+```bash
+python scripts/train.py --config configs/transformer_baseline.yaml
 ```
 
-Or recursively scan a data directory at training startup:
+Train the Transformer model from scratch with light tracking-reference auxiliary losses:
 
-```yaml
-data:
-  train_data_dir: data/raw
-  val_data_dir:
+```bash
+python scripts/train.py --config configs/transformer_aux_light_scratch.yaml
 ```
+
+The training script checks processed manifest metadata before training. If `assume_fps_if_missing`, `data.fps`, or the processed dataset changes, rebuild the dataset or refresh any external dataset cache before training.
 
 ## Sample
 
-Use a condition history `.npy` shaped `[H, 65]` or a longer `[T, 65]` sequence:
+Sample from a condition history:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/unet_pred_len10/best.pt \
-  --cond data/example_cond.npy \
-  --num_inference_steps 20 \
-  --output samples/predicted_chunk.npy
-```
-
-The DDIM sampler starts from Gaussian `x_T` by default. You can replace that later with a steering policy by passing externally supplied initial noise:
-
-```bash
-python scripts/sample.py \
-  --checkpoint checkpoints/unet_pred_len10/best.pt \
-  --cond data/example_cond.npy \
-  --x_T data/steered_noise.npy \
-  --output samples/predicted_chunk.npy
-```
-
-The externally supplied `x_T` should be shaped `[K, 65]` for one sample or
-`[B, K, 65]` for batched sampling. It lives in normalized diffusion space, not
-denormalized tracking-reference units. Use `--denormalize` when you want the
-saved prediction converted back to the original motion units.
-
-
-### Concrete Input/Output Example
-
-A small reproducible example is saved under `samples/pred_len10_example/`. It
-uses the `pred_len=10` checkpoint:
-
-```text
-checkpoint: checkpoints/pred_len10/latest.pt
-source:     processed_dataset/sequences/motion_014151.npy
-```
-
-The example input files are:
-
-```text
-samples/pred_len10_example/cond_history.npy       # [20, 65]
-samples/pred_len10_example/initial_noise_x_T.npy  # [10, 65]
-samples/pred_len10_example/target_future.npy      # [10, 65], held-out reference
-```
-
-`cond_history.npy` is the previous 20 tracking-reference frames. Each frame is:
-
-```text
-[ joint_pos(29), joint_vel(29), body_quat(4), body_pos(3) ]
-```
-
-`initial_noise_x_T.npy` is the initial DDIM latent/noise chunk. In this example
-it has approximately standard Gaussian statistics:
-
-```text
-mean = -0.0110
-std  =  0.9859
-```
-
-Run the example with externally supplied `x_T`:
-
-```bash
-python scripts/sample.py \
-  --checkpoint checkpoints/pred_len10/latest.pt \
-  --cond samples/pred_len10_example/cond_history.npy \
-  --x_T samples/pred_len10_example/initial_noise_x_T.npy \
-  --num_inference_steps 20 \
+  --checkpoint checkpoints/transformer_pred_len10_fps120/best.pt \
+  --cond samples/transformer_future_reference_check/sample_00_cond_history.npy \
+  --num_inference_steps 50 \
   --denormalize \
-  --output samples/pred_len10_example/predicted_future_latest.npy
+  --normalize_quat \
+  --output samples/predicted_chunk.npy
 ```
 
-This produces:
+Sample with externally supplied initial noise `x_T`:
+
+```bash
+python scripts/sample.py \
+  --checkpoint checkpoints/transformer_pred_len10_fps120/best.pt \
+  --cond samples/transformer_future_reference_check/sample_00_cond_history.npy \
+  --x_T samples/transformer_future_reference_check/sample_00_x_T.npy \
+  --num_inference_steps 50 \
+  --denormalize \
+  --normalize_quat \
+  --output samples/predicted_chunk.npy
+```
+
+`--normalize_quat` normalizes the generated `body_quat` channels after sampling. `--reconstruct_velocity --fps 50` can replace predicted joint velocity channels with finite differences of predicted joint positions, but this may amplify noise if the generated joint positions are not smooth.
+
+## GR00T / SONIC Tracking Compatibility
+
+The companion tracking-code directory `AI502TermProject/` is intentionally treated as read-only.
+
+Its diffusion tracking manager expects future motion shaped:
 
 ```text
-samples/pred_len10_example/predicted_future_latest.npy  # [10, 65]
-samples/pred_len10_example/summary.json                 # shape/stat summary
-samples/pred_len10_example/csv/                         # exported CSV preview
+[num_envs, horizon, 65]
 ```
 
-For the saved example, the first predicted frame starts with:
+with the same 65D layout. It converts the first 10 future frames into SONIC tracking commands shaped:
 
 ```text
-joint_pos[0:8] = [0.076020, 0.172944, 0.261720, 0.147468,
-                  -0.167161, -0.135897, 0.095730, -0.154970]
-body_quat     = [0.676549, -0.015048, -0.014110, -0.752402]
-body_pos      = [-0.015890, 0.028918, 0.779900]
+[num_envs, 10, 64] = [joint_pos(29), joint_vel(29), relative_root_rot6(6)]
 ```
 
-Compared with the held-out `target_future.npy`, this single example gives:
-
-```text
-full_mse:              0.00025365
-joint_pos_mse:         0.00002620
-joint_vel_mse:         0.00051899
-quaternion_norm_error: 0.01255170
-```
+Because this dataset preprocessing stores root orientation as a world/root quaternion, integration should use the converter path that treats diffusion orientation as world-frame and converts it relative to the current root orientation.
 
 ## Export CSV
 
-Predictions are exported without changing representation:
+Export a predicted chunk into grouped CSV files:
 
 ```bash
 python scripts/export_reference.py \
   --chunk samples/predicted_chunk.npy \
-  --stats checkpoints/normalization_stats.json \
-  --output_dir exports/reference
+  --stats processed_dataset/stats/stats.json \
+  --output_dir exports/reference \
+  --already_denormalized
 ```
 
-To export velocity from finite differences of `joint_pos` instead of the predicted velocity channels:
+To export velocity from finite differences:
 
 ```bash
 python scripts/export_reference.py \
   --chunk samples/predicted_chunk.npy \
-  --stats checkpoints/normalization_stats.json \
+  --stats processed_dataset/stats/stats.json \
   --output_dir exports/reference \
+  --already_denormalized \
   --reconstruct_velocity \
   --fps 50
 ```
@@ -294,20 +303,37 @@ body_quat.csv
 body_pos.csv
 ```
 
-Use `--already_denormalized` if the chunk has already been converted back to original tracking-reference units.
+`body_quat.csv` uses header order:
+
+```text
+w, x, y, z
+```
 
 ## Evaluate
 
+Compare a predicted future chunk with a target future chunk:
+
 ```bash
-python scripts/evaluate.py --pred samples/predicted_chunk.npy --target data/target_chunk.npy
+python scripts/evaluate.py \
+  --pred samples/predicted_chunk.npy \
+  --target samples/target_chunk.npy
 ```
 
-Reports full future chunk MSE, joint position MSE, joint velocity MSE, and quaternion norm error.
+It reports:
+
+```text
+full_mse
+joint_pos_mse
+joint_vel_mse
+quaternion_norm_error
+```
 
 ## Tests
 
-Run the no-dependency smoke runner:
+Run smoke tests:
 
 ```bash
 python tests/run_smoke_tests.py
 ```
+
+The tests use synthetic arrays and do not require BONES-SEED.

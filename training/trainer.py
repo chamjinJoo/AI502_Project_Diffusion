@@ -71,14 +71,35 @@ class Trainer:
         noise_loss = F.mse_loss(eps_hat, noise)
 
         x0_pred = self.diffusion.predict_x0_from_eps(xt, timesteps, eps_hat)  # [B, K, 65]
-        vel_loss = self.diffusion.velocity_consistency_loss(x0_pred)
-        quat_loss = self.diffusion.quaternion_unit_loss(x0_pred)
+        aux_max_timestep = self.cfg["training"].get("auxiliary_max_timestep")
+        if aux_max_timestep is not None:
+            aux_mask = timesteps <= int(aux_max_timestep)
+            x0_aux = x0_pred[aux_mask]
+            cond_aux = cond[aux_mask]
+        else:
+            x0_aux = x0_pred
+            cond_aux = cond
+        if x0_aux.shape[0] == 0:
+            vel_loss = x0_pred.new_tensor(0.0)
+            quat_loss = x0_pred.new_tensor(0.0)
+            continuity_loss = x0_pred.new_tensor(0.0)
+        else:
+            vel_loss = self.diffusion.velocity_consistency_loss(x0_aux)
+            quat_loss = self.diffusion.quaternion_unit_loss(x0_aux)
+            continuity_loss = self.diffusion.continuity_loss(x0_aux, cond_aux)
         total = (
             noise_loss
             + self.diffusion.velocity_loss_weight * vel_loss
             + self.diffusion.quaternion_loss_weight * quat_loss
+            + self.diffusion.continuity_loss_weight * continuity_loss
         )
-        return {"loss": total, "noise_loss": noise_loss, "velocity_loss": vel_loss, "quaternion_loss": quat_loss}
+        return {
+            "loss": total,
+            "noise_loss": noise_loss,
+            "velocity_loss": vel_loss,
+            "quaternion_loss": quat_loss,
+            "continuity_loss": continuity_loss,
+        }
 
     def _save_checkpoint(self, name: str, epoch: int, val_loss: float) -> None:
         path = self.checkpoint_dir / name
@@ -132,6 +153,20 @@ class Trainer:
                 f"Refusing to resume {path}: checkpoint architecture={previous_arch!r}, "
                 f"current architecture={current_arch!r}. Use a separate checkpoint_dir or set resume: false."
             )
+        if current_arch == "unet":
+            for key, default in (
+                ("condition_encoder", "transformer"),
+                ("condition_summary", "mean"),
+                ("dim", None),
+                ("down_dims", None),
+            ):
+                current_value = current_model.get(key, default)
+                previous_value = previous_model.get(key, default)
+                if current_value != previous_value:
+                    raise RuntimeError(
+                        f"Refusing to resume {path}: checkpoint model.{key}={previous_value}, "
+                        f"current model.{key}={current_value}."
+                    )
 
         current_data = self.cfg.get("data", {})
         previous_data = checkpoint_cfg.get("data", {})
@@ -144,7 +179,13 @@ class Trainer:
 
     def train_epoch(self, epoch: int) -> dict[str, float]:
         self.diffusion.train()
-        totals: dict[str, float] = {"loss": 0.0, "noise_loss": 0.0, "velocity_loss": 0.0, "quaternion_loss": 0.0}
+        totals: dict[str, float] = {
+            "loss": 0.0,
+            "noise_loss": 0.0,
+            "velocity_loss": 0.0,
+            "quaternion_loss": 0.0,
+            "continuity_loss": 0.0,
+        }
         for batch in self.train_loader:
             batch = self._move_batch(batch)
             self.optimizer.zero_grad(set_to_none=True)
@@ -163,9 +204,21 @@ class Trainer:
     @torch.no_grad()
     def validate(self) -> dict[str, float]:
         if self.val_loader is None:
-            return {"loss": float("nan"), "noise_loss": float("nan"), "velocity_loss": float("nan"), "quaternion_loss": float("nan")}
+            return {
+                "loss": float("nan"),
+                "noise_loss": float("nan"),
+                "velocity_loss": float("nan"),
+                "quaternion_loss": float("nan"),
+                "continuity_loss": float("nan"),
+            }
         self.diffusion.eval()
-        totals: dict[str, float] = {"loss": 0.0, "noise_loss": 0.0, "velocity_loss": 0.0, "quaternion_loss": 0.0}
+        totals: dict[str, float] = {
+            "loss": 0.0,
+            "noise_loss": 0.0,
+            "velocity_loss": 0.0,
+            "quaternion_loss": 0.0,
+            "continuity_loss": 0.0,
+        }
         for batch in self.val_loader:
             batch = self._move_batch(batch)
             losses = self._compute_losses(batch["cond"], batch["target"])
@@ -190,7 +243,10 @@ class Trainer:
 
             msg = (
                 f"epoch {epoch:04d} | train {train_metrics['loss']:.6f} "
-                f"| val {val_metrics['loss']:.6f} | noise {train_metrics['noise_loss']:.6f}"
+                f"| val {val_metrics['loss']:.6f} | noise {train_metrics['noise_loss']:.6f} "
+                f"| vel {train_metrics['velocity_loss']:.6f} "
+                f"| quat {train_metrics['quaternion_loss']:.6f} "
+                f"| cont {train_metrics['continuity_loss']:.6f}"
             )
             print(msg, flush=True)
             if self.wandb is not None:

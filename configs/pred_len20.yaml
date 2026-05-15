@@ -30,7 +30,7 @@ training:
   grad_clip: 1.0
   velocity_loss_weight: 0.0
   quaternion_loss_weight: 0.0
-  checkpoint_dir: checkpoints/unet_pred_len20
+  checkpoint_dir: checkpoints/unet_pred_len20_flatcond
   resume: true
   use_wandb: false
   device: cuda
@@ -49,6 +49,7 @@ model:
   num_heads: 4
   dropout: 0.1
   condition_encoder: transformer
+  condition_summary: flatten
   down_dims: [256, 512, 1024]
   kernel_size: 3
   n_groups: 8
