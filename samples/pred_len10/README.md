@@ -1,11 +1,29 @@
 # pred_len10 sample outputs
 
-These `.npy` files are denormalized future-reference chunks sampled from
-`checkpoints/pred_len10/best.pt` with DDIM 50 steps.
+This directory contains denormalized future-reference chunks sampled from the
+curated `pred_len=10` Transformer checkpoint candidates with DDIM 50 steps.
 
-Each sample has shape `[10, 65]` and keeps the model-predicted `joint_vel`
-channels. The repository recommendation is to use these predicted velocities by
-default rather than replacing them with finite-difference velocities.
+Each `.npy` sample has shape `[10, 65]` and keeps the model-predicted
+`joint_vel` channels. This is the recommended export path for now.
 
-`evaluation_summary.json` contains the lightweight reference-quality checks for
-the curated predicted-velocity samples.
+## Layout
+
+```text
+transformer_baseline/
+  sample_00_future.npy
+  sample_01_future.npy
+  sample_02_future.npy
+  sample_03_future.npy
+
+transformer_velocity_consistent/
+  sample_00_future.npy
+  sample_01_future.npy
+  sample_02_future.npy
+  sample_03_future.npy
+
+candidate_comparison.json
+```
+
+`candidate_comparison.json` contains a compact offline validation comparison
+using shared validation windows and shared initial DDIM noise. It is a reference
+quality check, not a substitute for a real GR00T/SONIC rollout A/B test.

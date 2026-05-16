@@ -14,6 +14,7 @@ from datasets.motion_chunk_dataset import MotionChunkDataset
 from data_prep.convert_bones_seed_to_internal import convert_one_csv
 from diffusion.scheduler_wrapper import DiffusionSchedulerWrapper
 from models.denoiser import ConditionalDenoiser
+from scripts.evaluate import compute_metrics
 from scripts.train import validate_processed_manifest_metadata
 from training.trainer import Trainer
 from utils.export_csv import export_reference_csv, reconstruct_joint_vel
@@ -209,6 +210,18 @@ def test_reconstruct_joint_vel_single_frame() -> None:
     vel = reconstruct_joint_vel(chunk, fps=50.0)
     assert vel.shape == (1, 29)
     np.testing.assert_allclose(vel, np.zeros((1, 29), dtype=np.float32))
+
+
+def test_evaluate_reports_normalized_component_mse() -> None:
+    pred = np.zeros((1, 2, 65), dtype=np.float32)
+    target = np.zeros((1, 2, 65), dtype=np.float32)
+    pred[:, :, 29] = 2.0
+    std = np.ones(65, dtype=np.float32)
+    std[29] = 2.0
+    metrics = compute_metrics(pred, target, mean=np.zeros(65, dtype=np.float32), std=std)
+    assert np.isclose(metrics["joint_vel_mse"], 4.0 / 29.0)
+    assert np.isclose(metrics["norm_joint_vel_mse"], 1.0 / 29.0)
+    assert "norm_full_mse" in metrics
 
 
 def test_fallback_velocity_uses_output_fps_after_resampling(tmp_path: Path) -> None:

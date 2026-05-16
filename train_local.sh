@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-CONFIG="${1:-${CONFIG:-configs/transformer_aux_light_scratch.yaml}}"
+CONFIG="${1:-${CONFIG:-configs/default.yaml}}"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 DEVICE="${DEVICE:-}"
 WANDB_MODE="${WANDB_MODE:-disabled}"

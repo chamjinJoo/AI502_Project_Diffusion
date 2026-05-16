@@ -89,10 +89,13 @@ Raw and processed motion data are not committed to git because they are large ge
 ```text
 data/
 processed_dataset/
-checkpoints/
-samples/
 exports/
 ```
+
+The repository does include a small curated set of candidate checkpoints and
+example future-reference samples under `checkpoints/pred_len10/` and
+`samples/pred_len10/`. Full training runs, intermediate checkpoints, and large
+sample dumps should stay local.
 
 On a new machine, download BONES-SEED separately, place the Unitree G1 MuJoCo-compatible CSV data under the path configured in [configs/dataset_build.yaml](configs/dataset_build.yaml), then run the preprocessing pipeline.
 
@@ -177,7 +180,7 @@ The current default denoiser is the Transformer implementation in [models/denois
 - Transformer condition encoder over the previous motion history
 - temporal Transformer encoder over the future target tokens
 
-The default training config follows the job 23 setup:
+The default training config follows the current Transformer baseline setup:
 
 ```yaml
 model:
@@ -200,22 +203,32 @@ training:
 
 The auxiliary losses are deliberately small. The main objective remains epsilon-prediction MSE, while the auxiliary terms lightly encourage velocity consistency, unit quaternions, and continuity from the last history frame.
 
-Recommended Transformer checkpoint:
+Curated Transformer checkpoint candidates:
 
 ```text
-configs/default.yaml
-checkpoints/pred_len10/best.pt
+checkpoints/pred_len10/transformer_baseline.pt
+checkpoints/pred_len10/transformer_velocity_consistent.pt
 ```
 
-This checkpoint is the curated job 27 best model trained with the default
-`pred_len=10` Transformer setup. It is the checkpoint to use for practical
-sampling and GR00T/SONIC tracking-reference experiments in this repository.
+`transformer_baseline.pt` is the default `pred_len=10` Transformer model and is
+the first checkpoint to try for practical sampling.
 
-Example generated chunks from this checkpoint are included under
-`samples/pred_len10/`. These samples keep the model-predicted `joint_vel`
-channels. That is the recommended path for now; finite-difference velocity
-reconstruction is still available as an export option, but it is not the
-default recommendation.
+`transformer_velocity_consistent.pt` was trained with a small velocity
+consistency auxiliary term. Offline checks show slightly smoother joint-position
+steps and better agreement between predicted velocity and finite-difference
+velocity, so it is a useful A/B rollout candidate for GR00T/SONIC.
+
+Example generated chunks are included under:
+
+```text
+samples/pred_len10/transformer_baseline/
+samples/pred_len10/transformer_velocity_consistent/
+samples/pred_len10/candidate_comparison.json
+```
+
+These samples keep the model-predicted `joint_vel` channels. That is the
+recommended path for now; finite-difference velocity reconstruction is still
+available as an export option, but it is not the default recommendation.
 
 ### Diffusion Policy Style ConditionalUnet1D
 
@@ -263,7 +276,7 @@ Sample from a condition history:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/pred_len10/best.pt \
+  --checkpoint checkpoints/pred_len10/transformer_baseline.pt \
   --cond path/to/cond_history.npy \
   --num_inference_steps 50 \
   --denormalize \
@@ -275,7 +288,7 @@ Sample with externally supplied initial noise `x_T`:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/pred_len10/best.pt \
+  --checkpoint checkpoints/pred_len10/transformer_baseline.pt \
   --cond path/to/cond_history.npy \
   --x_T path/to/initial_noise_x_T.npy \
   --num_inference_steps 50 \
@@ -289,14 +302,18 @@ By default, use the model-predicted `joint_vel` channels. `--reconstruct_velocit
 --fps 50` can replace them with finite differences of predicted joint positions,
 but this may amplify noise if the generated joint positions are not smooth.
 
-Included sample outputs from the recommended checkpoint:
+Included sample outputs from the candidate checkpoints:
 
 ```text
-samples/pred_len10/sample_00_predicted_future.npy
-samples/pred_len10/sample_01_predicted_future.npy
-samples/pred_len10/sample_02_predicted_future.npy
-samples/pred_len10/sample_03_predicted_future.npy
-samples/pred_len10/evaluation_summary.json
+samples/pred_len10/transformer_baseline/sample_00_future.npy
+samples/pred_len10/transformer_baseline/sample_01_future.npy
+samples/pred_len10/transformer_baseline/sample_02_future.npy
+samples/pred_len10/transformer_baseline/sample_03_future.npy
+samples/pred_len10/transformer_velocity_consistent/sample_00_future.npy
+samples/pred_len10/transformer_velocity_consistent/sample_01_future.npy
+samples/pred_len10/transformer_velocity_consistent/sample_02_future.npy
+samples/pred_len10/transformer_velocity_consistent/sample_03_future.npy
+samples/pred_len10/candidate_comparison.json
 ```
 
 ## GR00T / SONIC Tracking Compatibility

@@ -22,6 +22,7 @@ from test_smoke import (
     test_ddim_sampler_external_xt_shape_check,
     test_ddim_sampler_output_shape,
     test_ddim_sampler_output_shape_with_unet,
+    test_evaluate_reports_normalized_component_mse,
     test_fallback_velocity_uses_output_fps_after_resampling,
     test_processed_manifest_stale_assumed_fps_guard,
     test_reconstruct_joint_vel_single_frame,
@@ -45,6 +46,7 @@ def main() -> None:
     test_transformer_denoiser_backward_compat_output_shape()
     test_reconstruct_joint_vel_uses_fps()
     test_reconstruct_joint_vel_single_frame()
+    test_evaluate_reports_normalized_component_mse()
     with TemporaryDirectory() as tmp:
         test_fallback_velocity_uses_output_fps_after_resampling(Path(tmp))
     with TemporaryDirectory() as tmp:

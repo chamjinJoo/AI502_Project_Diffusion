@@ -7,8 +7,19 @@ from pathlib import Path
 
 import numpy as np
 
+from datasets.motion_chunk_dataset import load_stats
+
+
+_COMPONENTS: dict[str, slice] = {
+    "joint_pos": slice(0, 29),
+    "joint_vel": slice(29, 58),
+    "body_quat": slice(58, 62),
+    "body_pos": slice(62, 65),
+}
+
 
 def _load(path: str | Path) -> np.ndarray:
+    """Load a future chunk as [N, K, 65]."""
     array = np.load(path).astype(np.float32)
     if array.ndim == 2:
         array = array[None]  # [1, K, 65]
@@ -17,26 +28,60 @@ def _load(path: str | Path) -> np.ndarray:
     return array
 
 
+def _component_mse(pred: np.ndarray, target: np.ndarray, prefix: str = "") -> dict[str, float]:
+    """Compute full and per-component MSE for [N, K, 65] arrays."""
+    metrics = {f"{prefix}full_mse": float(np.mean((pred - target) ** 2))}
+    for name, slc in _COMPONENTS.items():
+        metrics[f"{prefix}{name}_mse"] = float(np.mean((pred[:, :, slc] - target[:, :, slc]) ** 2))
+    return metrics
+
+
+def compute_metrics(
+    pred: np.ndarray,
+    target: np.ndarray,
+    mean: np.ndarray | None = None,
+    std: np.ndarray | None = None,
+) -> dict[str, float]:
+    """Compute physical-space metrics and optional normalized-space MSE.
+
+    Args:
+        pred: Predicted future chunks with shape [N, K, 65].
+        target: Target future chunks with shape [N, K, 65].
+        mean: Optional normalization mean with shape [65].
+        std: Optional normalization std with shape [65].
+    """
+    if pred.shape != target.shape:
+        raise ValueError(f"pred and target shapes must match, got {pred.shape} and {target.shape}")
+
+    metrics = _component_mse(pred, target)
+    quat = pred[:, :, 58:62]  # [N, K, 4], body_quat in (w, x, y, z)
+    metrics["quaternion_norm_error"] = float(np.mean(np.abs(np.linalg.norm(quat, axis=-1) - 1.0)))
+
+    if mean is not None and std is not None:
+        mean = mean.astype(np.float32).reshape(1, 1, 65)
+        std = np.maximum(std.astype(np.float32).reshape(1, 1, 65), 1e-6)
+        pred_norm = (pred - mean) / std
+        target_norm = (target - mean) / std
+        metrics.update(_component_mse(pred_norm, target_norm, prefix="norm_"))
+    return metrics
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pred", type=str, required=True)
     parser.add_argument("--target", type=str, required=True)
+    parser.add_argument("--stats", type=str, default=None, help="Optional normalization stats JSON/NPZ")
     args = parser.parse_args()
 
     pred = _load(args.pred)
     target = _load(args.target)
-    if pred.shape != target.shape:
-        raise ValueError(f"pred and target shapes must match, got {pred.shape} and {target.shape}")
+    mean = std = None
+    if args.stats is not None:
+        mean, std = load_stats(args.stats)
 
-    full_mse = float(np.mean((pred - target) ** 2))
-    joint_pos_mse = float(np.mean((pred[:, :, :29] - target[:, :, :29]) ** 2))
-    joint_vel_mse = float(np.mean((pred[:, :, 29:58] - target[:, :, 29:58]) ** 2))
-    quat_norm_error = float(np.mean(np.abs(np.linalg.norm(pred[:, :, 58:62], axis=-1) - 1.0)))
-
-    print(f"full_mse: {full_mse:.8f}")
-    print(f"joint_pos_mse: {joint_pos_mse:.8f}")
-    print(f"joint_vel_mse: {joint_vel_mse:.8f}")
-    print(f"quaternion_norm_error: {quat_norm_error:.8f}")
+    metrics = compute_metrics(pred, target, mean=mean, std=std)
+    for key, value in metrics.items():
+        print(f"{key}: {value:.8f}")
 
 
 if __name__ == "__main__":
