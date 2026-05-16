@@ -50,17 +50,29 @@ class DiffusionSchedulerWrapper(nn.Module):
         )
 
     def set_normalization_stats(self, mean: torch.Tensor, std: torch.Tensor) -> None:
-        """Store z-score stats so auxiliary losses can run in physical units."""
+        """Store z-score stats for physical/normalized auxiliary losses."""
         self.norm_mean = mean.float().view(1, 1, -1)
         self.norm_std = std.float().view(1, 1, -1).clamp_min(1e-6)
 
+    def _has_normalization_stats(self, frame_dim: int = 65) -> bool:
+        """Return whether per-dimension normalization stats are available."""
+        return self.norm_mean.numel() == frame_dim and self.norm_std.numel() == frame_dim
+
     def _denormalize_if_available(self, chunk: torch.Tensor) -> torch.Tensor:
         """Convert normalized [B, T, 65] chunks back to tracking-reference units."""
-        if self.norm_mean.numel() == chunk.shape[-1] and self.norm_std.numel() == chunk.shape[-1]:
+        if self._has_normalization_stats(chunk.shape[-1]):
             mean = self.norm_mean.to(device=chunk.device, dtype=chunk.dtype)
             std = self.norm_std.to(device=chunk.device, dtype=chunk.dtype)
             return chunk * std + mean
         return chunk
+
+    def _normalize_joint_vel_if_available(self, joint_vel: torch.Tensor) -> torch.Tensor:
+        """Normalize physical joint velocity [B, T, 29] when stats are available."""
+        if not self._has_normalization_stats(65):
+            return joint_vel
+        mean = self.norm_mean[..., 29:58].to(device=joint_vel.device, dtype=joint_vel.dtype)
+        std = self.norm_std[..., 29:58].to(device=joint_vel.device, dtype=joint_vel.dtype)
+        return (joint_vel - mean) / std
 
     def _move_scheduler_tensors(self, device: torch.device, dtype: torch.dtype) -> None:
         """Move scheduler tensors because diffusers schedulers are not nn.Modules."""
@@ -105,13 +117,25 @@ class DiffusionSchedulerWrapper(nn.Module):
         return (xt - torch.sqrt(1.0 - alpha_t) * eps) / torch.sqrt(alpha_t).clamp_min(1e-8)  # [B, K, 65]
 
     def velocity_consistency_loss(self, x0_pred: torch.Tensor) -> torch.Tensor:
-        """Compare joint_vel to finite differences of joint_pos in physical units."""
+        """Compare predicted joint_vel to finite-difference velocity.
+
+        When dataset normalization stats are available, the comparison is made
+        in normalized velocity space so the auxiliary term is on a scale closer
+        to the epsilon-prediction objective. Without stats, it falls back to
+        physical tracking-reference units.
+        """
         if x0_pred.shape[1] < 2:
             return x0_pred.new_tensor(0.0)
-        x0_pred = self._denormalize_if_available(x0_pred)
-        joint_pos = x0_pred[:, :, :29]  # [B, K, 29]
-        joint_vel = x0_pred[:, :, 29:58]  # [B, K, 29]
-        finite_diff = (joint_pos[:, 1:] - joint_pos[:, :-1]) * self.fps  # [B, K-1, 29]
+        x0_phys = self._denormalize_if_available(x0_pred)
+        joint_pos_phys = x0_phys[:, :, :29]  # [B, K, 29]
+        finite_diff_phys = (joint_pos_phys[:, 1:] - joint_pos_phys[:, :-1]) * self.fps  # [B, K-1, 29]
+
+        if self._has_normalization_stats(65):
+            joint_vel = x0_pred[:, :, 29:58]  # [B, K, 29], normalized
+            finite_diff = self._normalize_joint_vel_if_available(finite_diff_phys)  # [B, K-1, 29]
+        else:
+            joint_vel = x0_phys[:, :, 29:58]  # [B, K, 29], physical
+            finite_diff = finite_diff_phys
         return F.smooth_l1_loss(joint_vel[:, 1:], finite_diff)
 
     def quaternion_unit_loss(self, x0_pred: torch.Tensor) -> torch.Tensor:
@@ -128,6 +152,14 @@ class DiffusionSchedulerWrapper(nn.Module):
         last = cond[:, -1]  # [B, 65]
         expected_joint_pos = last[:, :29] + last[:, 29:58] / self.fps  # [B, 29]
         loss = F.smooth_l1_loss(x0_pred[:, 0, :29], expected_joint_pos)
+
+        # Velocity seam: first future velocity should agree with the history
+        # velocity and with the first position step across the history/future boundary.
+        expected_joint_vel = last[:, 29:58]  # [B, 29]
+        seam_joint_vel = (x0_pred[:, 0, :29] - last[:, :29]) * self.fps  # [B, 29]
+        pred_first_vel = x0_pred[:, 0, 29:58]  # [B, 29]
+        loss = loss + 0.1 * F.smooth_l1_loss(pred_first_vel, expected_joint_vel)
+        loss = loss + 0.1 * F.smooth_l1_loss(pred_first_vel, seam_joint_vel)
 
         if cond.shape[1] >= 2:
             root_delta = cond[:, -1, 62:65] - cond[:, -2, 62:65]  # [B, 3]

@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 import numpy as np
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(ROOT))
 
 from datasets.motion_chunk_dataset import load_stats
 

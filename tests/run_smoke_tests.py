@@ -27,7 +27,10 @@ from test_smoke import (
     test_processed_manifest_stale_assumed_fps_guard,
     test_reconstruct_joint_vel_single_frame,
     test_reconstruct_joint_vel_uses_fps,
+    test_reference_quality_reports_seam_metrics,
     test_transformer_denoiser_backward_compat_output_shape,
+    test_velocity_consistency_uses_normalized_velocity_space,
+    test_continuity_loss_penalizes_velocity_seam,
 )
 
 
@@ -44,9 +47,12 @@ def main() -> None:
     test_conditional_unet_denoiser_output_shape()
     test_conditional_unet_mean_summary_backward_compat_output_shape()
     test_transformer_denoiser_backward_compat_output_shape()
+    test_velocity_consistency_uses_normalized_velocity_space()
+    test_continuity_loss_penalizes_velocity_seam()
     test_reconstruct_joint_vel_uses_fps()
     test_reconstruct_joint_vel_single_frame()
     test_evaluate_reports_normalized_component_mse()
+    test_reference_quality_reports_seam_metrics()
     with TemporaryDirectory() as tmp:
         test_fallback_velocity_uses_output_fps_after_resampling(Path(tmp))
     with TemporaryDirectory() as tmp:

@@ -15,6 +15,7 @@ from data_prep.convert_bones_seed_to_internal import convert_one_csv
 from diffusion.scheduler_wrapper import DiffusionSchedulerWrapper
 from models.denoiser import ConditionalDenoiser
 from scripts.evaluate import compute_metrics
+from scripts.evaluate_reference_quality import reference_quality_metrics
 from scripts.train import validate_processed_manifest_metadata
 from training.trainer import Trainer
 from utils.export_csv import export_reference_csv, reconstruct_joint_vel
@@ -93,7 +94,33 @@ def test_auxiliary_losses_use_fps_and_stats() -> None:
     cond[0, -1, 0] = 1.0
     cond[0, -1, 29] = 2.0
     x0[:, 0, 0] = 2.0
+    x0[:, 0, 29] = 2.0
     assert float(diffusion.continuity_loss(x0, cond)) == 0.0
+
+
+def test_velocity_consistency_uses_normalized_velocity_space() -> None:
+    diffusion = DiffusionSchedulerWrapper(ZeroDenoiser(), num_train_timesteps=8, beta_schedule="linear", fps=2.0)
+    mean = torch.zeros(65)
+    std = torch.ones(65)
+    std[29] = 2.0
+    diffusion.set_normalization_stats(mean, std)
+
+    x0 = torch.zeros(1, 2, 65)
+    # Physical position step is 1.0, so physical finite-difference velocity is 2.0.
+    # With joint_vel std=2.0, the normalized target velocity is 1.0.
+    x0[0, :, 0] = torch.tensor([0.0, 1.0])
+    x0[0, 1, 29] = 1.0
+    assert float(diffusion.velocity_consistency_loss(x0)) == 0.0
+
+
+def test_continuity_loss_penalizes_velocity_seam() -> None:
+    diffusion = DiffusionSchedulerWrapper(ZeroDenoiser(), num_train_timesteps=8, beta_schedule="linear", fps=2.0)
+    cond = torch.zeros(1, 2, 65)
+    cond[0, -1, 29] = 2.0
+    x0 = torch.zeros(1, 1, 65)
+    x0[0, 0, 0] = 1.0
+    x0[0, 0, 29] = 0.0
+    assert float(diffusion.continuity_loss(x0, cond)) > 0.0
 
 
 def test_ddim_sampler_output_shape() -> None:
@@ -222,6 +249,17 @@ def test_evaluate_reports_normalized_component_mse() -> None:
     assert np.isclose(metrics["joint_vel_mse"], 4.0 / 29.0)
     assert np.isclose(metrics["norm_joint_vel_mse"], 1.0 / 29.0)
     assert "norm_full_mse" in metrics
+
+
+def test_reference_quality_reports_seam_metrics() -> None:
+    pred = np.zeros((1, 2, 65), dtype=np.float32)
+    cond = np.zeros((1, 2, 65), dtype=np.float32)
+    pred[0, 0, 0] = 1.0
+    pred[0, 0, 29] = 1.0
+    metrics = reference_quality_metrics(pred, cond=cond, fps=2.0)
+    assert np.isclose(metrics["seam_pos_rmse"], np.sqrt(1.0 / 29.0))
+    assert "seam_velocity_mse" in metrics
+    assert "first_velocity_mse_to_history" in metrics
 
 
 def test_fallback_velocity_uses_output_fps_after_resampling(tmp_path: Path) -> None:
