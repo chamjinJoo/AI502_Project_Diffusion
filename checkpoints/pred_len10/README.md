@@ -13,3 +13,14 @@ future-reference diffusion planner. Both use the fixed 65D representation:
 - `transformer_velocity_consistent.pt`: Transformer checkpoint trained with a small velocity-consistency auxiliary term. Use this as an A/B rollout candidate when smooth velocity/reference consistency matters.
 
 Both checkpoints were selected by validation loss and are intended for GR00T/SONIC tracking-reference experiments.
+
+## Required normalization stats
+
+Use these checkpoints with the committed normalization file:
+
+```text
+processed_dataset/stats/stats.json
+```
+
+The stats are computed from the training split and contain the 65D z-score
+mean/std used by training and sampling. They are not generated-output metrics.

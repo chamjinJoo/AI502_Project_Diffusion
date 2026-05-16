@@ -88,14 +88,22 @@ Raw and processed motion data are not committed to git because they are large ge
 
 ```text
 data/
-processed_dataset/
+processed_dataset/*  # except processed_dataset/stats/stats.json
 exports/
 ```
 
-The repository does include a small curated set of candidate checkpoints and
-example future-reference samples under `checkpoints/pred_len10/` and
-`samples/pred_len10/`. Full training runs, intermediate checkpoints, and large
-sample dumps should stay local.
+The repository does include a small curated set of candidate checkpoints,
+example future-reference samples, and the training normalization stats needed
+for sampling:
+
+```text
+checkpoints/pred_len10/
+samples/pred_len10/
+processed_dataset/stats/stats.json
+```
+
+Full training runs, intermediate checkpoints, raw motion data, processed motion
+sequences, and manifests should stay local.
 
 On a new machine, download BONES-SEED separately, place the Unitree G1 MuJoCo-compatible CSV data under the path configured in [configs/dataset_build.yaml](configs/dataset_build.yaml), then run the preprocessing pipeline.
 
@@ -151,6 +159,11 @@ processed_dataset/manifests/train_manifest.jsonl
 processed_dataset/manifests/val_manifest.jsonl
 processed_dataset/stats/stats.json
 ```
+
+`processed_dataset/stats/stats.json` stores the per-dimension training-set
+normalization mean/std for the fixed 65D representation. It is not a summary of
+model-generated outputs. The released checkpoints expect this file for condition
+normalization during sampling and for denormalizing generated chunks.
 
 ## Diffusion Model Source
 

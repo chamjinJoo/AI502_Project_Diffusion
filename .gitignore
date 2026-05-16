@@ -15,7 +15,10 @@ env/
 
 # Large datasets and generated artifacts
 data/
-processed_dataset/
+processed_dataset/*
+!processed_dataset/stats/
+processed_dataset/stats/*
+!processed_dataset/stats/stats.json
 checkpoints/
 trained_model/
 samples/
