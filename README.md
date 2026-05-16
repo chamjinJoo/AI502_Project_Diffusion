@@ -316,24 +316,6 @@ samples/pred_len10/transformer_velocity_consistent/sample_03_future.npy
 samples/pred_len10/candidate_comparison.json
 ```
 
-## GR00T / SONIC Tracking Compatibility
-
-The companion tracking-code directory `AI502TermProject/` is intentionally treated as read-only.
-
-Its diffusion tracking manager expects future motion shaped:
-
-```text
-[num_envs, horizon, 65]
-```
-
-with the same 65D layout. It converts the first 10 future frames into SONIC tracking commands shaped:
-
-```text
-[num_envs, 10, 64] = [joint_pos(29), joint_vel(29), relative_root_rot6(6)]
-```
-
-Because this dataset preprocessing stores root orientation as a world/root quaternion, integration should use the converter path that treats diffusion orientation as world-frame and converts it relative to the current root orientation.
-
 ## Export CSV
 
 Recommended path: export the model-predicted `joint_vel` channels directly.
