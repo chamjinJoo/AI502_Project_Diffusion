@@ -134,7 +134,8 @@ class ConditionalUnet1D(nn.Module):
     def __init__(
         self,
         input_dim: int,
-        global_cond_dim: int,
+        global_cond_dim: int | None = None,
+        local_cond_dim: int | None = None,
         diffusion_step_embed_dim: int = 256,
         down_dims: tuple[int, ...] = (256, 512, 1024),
         kernel_size: int = 3,
@@ -147,7 +148,7 @@ class ConditionalUnet1D(nn.Module):
 
         all_dims = [input_dim, *down_dims]
         in_out = list(zip(all_dims[:-1], all_dims[1:]))
-        cond_dim = diffusion_step_embed_dim + global_cond_dim
+        cond_dim = diffusion_step_embed_dim + int(global_cond_dim or 0)
 
         self.diffusion_step_encoder = nn.Sequential(
             SinusoidalPosEmb(diffusion_step_embed_dim),
@@ -155,6 +156,20 @@ class ConditionalUnet1D(nn.Module):
             nn.Mish(),
             nn.Linear(diffusion_step_embed_dim * 4, diffusion_step_embed_dim),
         )
+
+        self.local_cond_encoder: nn.ModuleList | None = None
+        if local_cond_dim is not None:
+            _, first_dim = in_out[0]
+            self.local_cond_encoder = nn.ModuleList(
+                [
+                    ConditionalResidualBlock1D(
+                        local_cond_dim, first_dim, cond_dim, kernel_size, n_groups, cond_predict_scale
+                    ),
+                    ConditionalResidualBlock1D(
+                        local_cond_dim, first_dim, cond_dim, kernel_size, n_groups, cond_predict_scale
+                    ),
+                ]
+            )
 
         self.down_modules = nn.ModuleList()
         for idx, (dim_in, dim_out) in enumerate(in_out):
@@ -204,24 +219,43 @@ class ConditionalUnet1D(nn.Module):
             nn.Conv1d(start_dim, input_dim, 1),
         )
 
-    def forward(self, sample: torch.Tensor, timestep: torch.Tensor, global_cond: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        sample: torch.Tensor,
+        timestep: torch.Tensor,
+        global_cond: torch.Tensor | None = None,
+        local_cond: torch.Tensor | None = None,
+    ) -> torch.Tensor:
         """Predict noise.
 
         Args:
             sample: Noisy future chunk with shape [B, K, frame_dim].
             timestep: Diffusion timesteps with shape [B].
-            global_cond: Encoded history condition with shape [B, D].
+            global_cond: Encoded history summary with shape [B, Dg].
+            local_cond: Per-horizon context with shape [B, K, Dl].
         """
         x = sample.transpose(1, 2)  # [B, frame_dim, K]
         if timestep.ndim == 0:
             timestep = timestep[None]
         timestep = timestep.to(device=sample.device).expand(sample.shape[0])  # [B]
-        time_cond = self.diffusion_step_encoder(timestep)  # [B, D_t]
-        cond = torch.cat([time_cond, global_cond], dim=-1)  # [B, D_t + D_cond]
+        cond = self.diffusion_step_encoder(timestep)  # [B, D_t]
+        if global_cond is not None:
+            cond = torch.cat([cond, global_cond], dim=-1)  # [B, D_t + Dg]
+
+        local_features: list[torch.Tensor] = []
+        if local_cond is not None:
+            if self.local_cond_encoder is None:
+                raise ValueError("local_cond was provided but local_cond_dim was not configured")
+            local_x = local_cond.transpose(1, 2)  # [B, Dl, K]
+            down_local, up_local = self.local_cond_encoder
+            local_features.append(down_local(local_x, cond))  # [B, C0, K]
+            local_features.append(up_local(local_x, cond))  # [B, C0, K]
 
         skips: list[torch.Tensor] = []
-        for resnet, resnet2, downsample in self.down_modules:
+        for idx, (resnet, resnet2, downsample) in enumerate(self.down_modules):
             x = resnet(x, cond)
+            if idx == 0 and local_features:
+                x = x + _match_horizon(local_features[0], x.shape[-1])
             x = resnet2(x, cond)
             skips.append(x)
             x = downsample(x)
@@ -229,11 +263,14 @@ class ConditionalUnet1D(nn.Module):
         for mid_module in self.mid_modules:
             x = mid_module(x, cond)
 
-        for resnet, resnet2, upsample in self.up_modules:
+        last_up_idx = len(self.up_modules) - 1
+        for idx, (resnet, resnet2, upsample) in enumerate(self.up_modules):
             skip = skips.pop()
             x = _match_horizon(x, skip.shape[-1])
             x = torch.cat((x, skip), dim=1)
             x = resnet(x, cond)
+            if idx == last_up_idx and len(local_features) > 1:
+                x = x + _match_horizon(local_features[1], x.shape[-1])
             x = resnet2(x, cond)
             x = upsample(x)
 

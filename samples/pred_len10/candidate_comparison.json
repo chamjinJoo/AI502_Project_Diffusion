@@ -50,5 +50,32 @@
       "mean_body_step_norm": 0.10335464030504227,
       "max_abs": 7.317492485046387
     }
+  },
+  "transformer_mdm_style": {
+    "checkpoint": "checkpoints/pred_len10/transformer_mdm_style.pt",
+    "description": "MDM-inspired Transformer with a diffusion timestep token and history/target segment embeddings. Recommended default candidate.",
+    "metrics": {
+      "full_mse": 0.012866923585534096,
+      "joint_pos_mse": 0.00014386660768650472,
+      "joint_vel_mse": 0.02847488410770893,
+      "body_quat_mse": 8.520886331098154e-05,
+      "body_pos_mse": 0.002021808410063386,
+      "quaternion_norm_error": 1.6950071568544445e-08,
+      "norm_full_mse": 0.013186868280172348,
+      "norm_joint_pos_mse": 0.0020947677548974752,
+      "norm_joint_vel_mse": 0.026771919801831245,
+      "norm_body_quat_mse": 0.004402036778628826,
+      "norm_body_pos_mse": 0.0008014845079742372,
+      "vel_fd_mse": 0.25845757126808167,
+      "mean_step_joint_pos_rmse": 0.010738502256572247,
+      "quat_norm_min": 0.9999998807907104,
+      "quat_norm_max": 1.0000001192092896,
+      "finite": 1.0,
+      "max_abs": 10.119760513305664,
+      "seam_pos_rmse": 0.007882327772676945,
+      "seam_expected_rmse": 0.00802505761384964,
+      "seam_velocity_mse": 0.1554105132818222,
+      "first_velocity_mse_to_history": 0.0023931197356432676
+    }
   }
 }

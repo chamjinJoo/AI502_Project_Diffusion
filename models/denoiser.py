@@ -11,7 +11,7 @@ from .time_embedding import TimestepEmbedding, sinusoidal_positional_encoding
 
 
 class TransformerDenoiser(nn.Module):
-    """Transformer denoiser with sinusoidal PE and joint history+target attention."""
+    """Transformer denoiser with optional MDM-style timestep token."""
 
     def __init__(
         self,
@@ -23,15 +23,20 @@ class TransformerDenoiser(nn.Module):
         num_heads: int = 4,
         dropout: float = 0.1,
         condition_encoder: str = "transformer",
+        use_time_token: bool = False,
+        use_segment_embedding: bool = False,
     ) -> None:
         super().__init__()
         self.frame_dim = frame_dim
         self.history_len = history_len
         self.pred_len = pred_len
         self.model_dim = model_dim
+        self.use_time_token = use_time_token
+        self.use_segment_embedding = use_segment_embedding
 
         self.target_proj = nn.Linear(frame_dim, model_dim)
         self.time_embed = TimestepEmbedding(model_dim)
+        self.segment_embed = nn.Embedding(3, model_dim) if use_segment_embedding else None
         self.condition_encoder = ConditionEncoder(
             frame_dim=frame_dim,
             model_dim=model_dim,
@@ -63,7 +68,7 @@ class TransformerDenoiser(nn.Module):
         Returns:
             Predicted noise with shape [B, K, 65].
         """
-        B, K, _ = xt.shape
+        _, K, _ = xt.shape
         H = self.history_len
         D = self.model_dim
 
@@ -71,19 +76,44 @@ class TransformerDenoiser(nn.Module):
         target_tokens = self.target_proj(xt)  # [B, K, D]
         time_emb = self.time_embed(timesteps)[:, None, :]  # [B, 1, D]
 
-        # Sinusoidal PE: history occupies positions 0..H-1, target H..H+K-1
-        cond_pe = sinusoidal_positional_encoding(H, D, cond.device, cond.dtype, offset=0)
-        target_pe = sinusoidal_positional_encoding(K, D, xt.device, xt.dtype, offset=H)
+        if self.use_time_token:
+            # MDM-style sequence: [diffusion timestep token, history tokens, target tokens].
+            cond_offset = 1
+            target_offset = 1 + H
+            time_pe = sinusoidal_positional_encoding(1, D, xt.device, xt.dtype, offset=0)
+            time_token = time_emb + time_pe  # [B, 1, D]
+        else:
+            # Backward-compatible sequence used by older checkpoints.
+            cond_offset = 0
+            target_offset = H
+            time_token = None
 
-        # Concat history and target tokens for joint self-attention
-        x = torch.cat([cond_tokens + cond_pe, target_tokens + target_pe], dim=1)  # [B, H+K, D]
-        x = x + time_emb  # broadcast timestep to all positions
-        x = self.backbone(x)  # [B, H+K, D]
-        return self.output(x[:, H:])  # [B, K, 65]
+        cond_pe = sinusoidal_positional_encoding(H, D, cond.device, cond.dtype, offset=cond_offset)
+        target_pe = sinusoidal_positional_encoding(K, D, xt.device, xt.dtype, offset=target_offset)
+        cond_tokens = cond_tokens + cond_pe  # [B, H, D]
+        target_tokens = target_tokens + target_pe  # [B, K, D]
+
+        if self.segment_embed is not None:
+            # Segment ids: 0=timestep, 1=history, 2=target.
+            cond_tokens = cond_tokens + self.segment_embed.weight[1].view(1, 1, D)
+            target_tokens = target_tokens + self.segment_embed.weight[2].view(1, 1, D)
+            if time_token is not None:
+                time_token = time_token + self.segment_embed.weight[0].view(1, 1, D)
+
+        if time_token is not None:
+            x = torch.cat([time_token, cond_tokens, target_tokens], dim=1)  # [B, 1+H+K, D]
+            target_start = 1 + H
+        else:
+            x = torch.cat([cond_tokens, target_tokens], dim=1)  # [B, H+K, D]
+            x = x + time_emb  # old behavior: broadcast timestep to all tokens
+            target_start = H
+
+        x = self.backbone(x)  # [B, sequence, D]
+        return self.output(x[:, target_start:])  # [B, K, 65]
 
 
 class UnetDenoiser(nn.Module):
-    """Diffusion Policy style U-Net denoiser with global history conditioning."""
+    """Diffusion Policy style U-Net denoiser with history conditioning."""
 
     def __init__(
         self,
@@ -100,11 +130,13 @@ class UnetDenoiser(nn.Module):
         n_groups: int = 8,
         cond_predict_scale: bool = False,
         condition_summary: str = "flatten",
+        use_local_condition: bool = False,
     ) -> None:
         super().__init__()
-        del pred_len
         self.frame_dim = frame_dim
+        self.pred_len = pred_len
         self.condition_summary_type = condition_summary
+        self.use_local_condition = use_local_condition
         self.condition_encoder = ConditionEncoder(
             frame_dim=frame_dim,
             model_dim=model_dim,
@@ -128,6 +160,7 @@ class UnetDenoiser(nn.Module):
         self.unet = ConditionalUnet1D(
             input_dim=frame_dim,
             global_cond_dim=model_dim,
+            local_cond_dim=model_dim if use_local_condition else None,
             diffusion_step_embed_dim=model_dim,
             down_dims=down_dims,
             kernel_size=kernel_size,
@@ -151,7 +184,17 @@ class UnetDenoiser(nn.Module):
             global_cond = self.cond_summary(cond_tokens.mean(dim=1))  # [B, D]
         else:
             global_cond = self.cond_summary(cond_tokens)  # [B, D]
-        return self.unet(xt, timesteps, global_cond)  # [B, K, 65]
+
+        local_cond = None
+        if self.use_local_condition:
+            # Diffusion Policy style local conditioning: inject recent history features
+            # into early U-Net blocks after aligning them to the target horizon.
+            local_cond = cond_tokens[:, -self.pred_len :]  # [B, <=K, D]
+            if local_cond.shape[1] < xt.shape[1]:
+                pad = local_cond[:, -1:].expand(-1, xt.shape[1] - local_cond.shape[1], -1)
+                local_cond = torch.cat([local_cond, pad], dim=1)
+            local_cond = local_cond[:, : xt.shape[1]]  # [B, K, D]
+        return self.unet(xt, timesteps, global_cond=global_cond, local_cond=local_cond)  # [B, K, 65]
 
 
 class ConditionalDenoiser(nn.Module):
@@ -173,6 +216,9 @@ class ConditionalDenoiser(nn.Module):
         n_groups: int = 8,
         cond_predict_scale: bool = False,
         condition_summary: str = "flatten",
+        use_time_token: bool = False,
+        use_segment_embedding: bool = False,
+        use_local_condition: bool = False,
     ) -> None:
         super().__init__()
         if architecture == "transformer":
@@ -185,6 +231,8 @@ class ConditionalDenoiser(nn.Module):
                 num_heads=num_heads,
                 dropout=dropout,
                 condition_encoder=condition_encoder,
+                use_time_token=use_time_token,
+                use_segment_embedding=use_segment_embedding,
             )
         elif architecture == "unet":
             self.net = UnetDenoiser(
@@ -201,6 +249,7 @@ class ConditionalDenoiser(nn.Module):
                 n_groups=n_groups,
                 cond_predict_scale=cond_predict_scale,
                 condition_summary=condition_summary,
+                use_local_condition=use_local_condition,
             )
         else:
             raise ValueError(f"unknown denoiser architecture: {architecture}")

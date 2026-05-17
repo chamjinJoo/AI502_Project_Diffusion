@@ -186,14 +186,22 @@ The denoiser interface is fixed as:
 model(xt [B, K, 65], cond [B, H, 65], timestep [B]) -> eps_hat [B, K, 65]
 ```
 
-The current default denoiser is the Transformer implementation in [models/denoiser.py](models/denoiser.py). It uses:
+The current recommended denoiser is the MDM-inspired Transformer implementation in [models/denoiser.py](models/denoiser.py). It keeps this project's direct 65D tracking-reference output while borrowing two simple sequence-design ideas from Motion Diffusion Model (MDM): a dedicated diffusion timestep token and explicit token-role separation.
+
+References:
+
+- Motion Diffusion Model repository: https://github.com/GuyTevet/motion-diffusion-model
+- Motion Diffusion Model paper: https://arxiv.org/abs/2209.14916
+
+The denoiser uses:
 
 - target-token projection for noisy future chunks
-- sinusoidal timestep embedding
-- Transformer condition encoder over the previous motion history
-- temporal Transformer encoder over the future target tokens
+- sinusoidal positional encodings over history and target tokens
+- Transformer condition encoder over previous motion history
+- joint self-attention over `[timestep token, history tokens, noisy target tokens]`
+- segment embeddings that distinguish timestep, history, and target tokens
 
-The default training config follows the current Transformer baseline setup:
+The default training config follows the current MDM-style Transformer setup:
 
 ```yaml
 model:
@@ -219,21 +227,22 @@ The auxiliary losses are deliberately small. The main objective remains epsilon-
 Curated Transformer checkpoint candidates:
 
 ```text
+checkpoints/pred_len10/transformer_mdm_style.pt
 checkpoints/pred_len10/transformer_baseline.pt
 checkpoints/pred_len10/transformer_velocity_consistent.pt
 ```
 
-`transformer_baseline.pt` is the default `pred_len=10` Transformer model and is
-the first checkpoint to try for practical sampling.
+`transformer_mdm_style.pt` is the recommended `pred_len=10` checkpoint. It uses the MDM-inspired timestep token and segment embeddings and gave the best offline reference-quality metrics among the current candidates.
+
+`transformer_baseline.pt` is the older Transformer baseline kept for comparison.
 
 `transformer_velocity_consistent.pt` was trained with a small velocity
-consistency auxiliary term. Offline checks show slightly smoother joint-position
-steps and better agreement between predicted velocity and finite-difference
-velocity, so it is a useful A/B rollout candidate for GR00T/SONIC.
+consistency auxiliary term. It is useful as an A/B rollout candidate when smooth velocity/reference consistency matters.
 
 Example generated chunks are included under:
 
 ```text
+samples/pred_len10/transformer_mdm_style/
 samples/pred_len10/transformer_baseline/
 samples/pred_len10/transformer_velocity_consistent/
 samples/pred_len10/candidate_comparison.json
@@ -250,7 +259,7 @@ The repository also contains a Diffusion Policy style U-Net in [models/condition
 - Diffusion Policy repository: https://github.com/real-stanford/diffusion_policy
 - Diffusion Policy paper: https://arxiv.org/abs/2303.04137
 
-This code path is retained for experiments, but it is not the current default. In our BONES-SEED locomotion setting, the Transformer denoiser has been the more useful baseline so far.
+This code path is retained for experiments and has been updated toward Diffusion Policy style global/local conditioning. It is not the current default. In our BONES-SEED locomotion setting, the MDM-style Transformer remains the stronger candidate so far.
 
 ## Requirements
 
@@ -267,16 +276,28 @@ Install an equivalent Python environment with PyTorch, NumPy, PyYAML, and Huggin
 
 ## Train
 
-Train the default Transformer configuration:
+Train the default MDM-style Transformer configuration:
 
 ```bash
 python scripts/train.py --config configs/default.yaml
 ```
 
+The same configuration is also saved explicitly as:
+
+```bash
+python scripts/train.py --config configs/transformer_mdm.yaml
+```
+
+The experimental Diffusion Policy style UNet configuration is:
+
+```bash
+python scripts/train.py --config configs/unet_diffusion_policy.yaml
+```
+
 `training.checkpoint_dir` may contain date tokens that are expanded at train launch time:
 
 ```yaml
-checkpoint_dir: checkpoints/transformer_pred_len10_fps120_{date}
+checkpoint_dir: checkpoints/transformer_mdm_pred_len10_fps120_{date}
 ```
 
 Supported tokens are `{date}` -> `YYYYMMDD` and `{datetime}` -> `YYYYMMDD_HHMMSS`.
@@ -289,7 +310,7 @@ Sample from a condition history:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/pred_len10/transformer_baseline.pt \
+  --checkpoint checkpoints/pred_len10/transformer_mdm_style.pt \
   --cond path/to/cond_history.npy \
   --num_inference_steps 50 \
   --denormalize \
@@ -301,7 +322,7 @@ Sample with externally supplied initial noise `x_T`:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/pred_len10/transformer_baseline.pt \
+  --checkpoint checkpoints/pred_len10/transformer_mdm_style.pt \
   --cond path/to/cond_history.npy \
   --x_T path/to/initial_noise_x_T.npy \
   --num_inference_steps 50 \
@@ -318,6 +339,10 @@ but this may amplify noise if the generated joint positions are not smooth.
 Included sample outputs from the candidate checkpoints:
 
 ```text
+samples/pred_len10/transformer_mdm_style/sample_00_future.npy
+samples/pred_len10/transformer_mdm_style/sample_01_future.npy
+samples/pred_len10/transformer_mdm_style/sample_02_future.npy
+samples/pred_len10/transformer_mdm_style/sample_03_future.npy
 samples/pred_len10/transformer_baseline/sample_00_future.npy
 samples/pred_len10/transformer_baseline/sample_01_future.npy
 samples/pred_len10/transformer_baseline/sample_02_future.npy

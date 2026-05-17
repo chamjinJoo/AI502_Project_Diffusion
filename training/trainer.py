@@ -160,6 +160,8 @@ class Trainer:
                 ("dim", None),
                 ("num_layers", None),
                 ("num_heads", None),
+                ("use_time_token", False),
+                ("use_segment_embedding", False),
             ):
                 current_value = current_model.get(key, default)
                 previous_value = previous_model.get(key, default)
@@ -172,6 +174,8 @@ class Trainer:
             for key, default in (
                 ("condition_encoder", "transformer"),
                 ("condition_summary", "flatten"),
+                ("use_local_condition", False),
+                ("cond_predict_scale", False),
                 ("dim", None),
                 ("down_dims", None),
             ):

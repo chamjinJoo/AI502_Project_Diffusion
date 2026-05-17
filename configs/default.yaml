@@ -32,7 +32,7 @@ training:
   quaternion_loss_weight: 0.00001
   continuity_loss_weight: 0.0001
   auxiliary_max_timestep: 200
-  checkpoint_dir: checkpoints/transformer_pred_len10_fps120_{date}
+  checkpoint_dir: checkpoints/transformer_mdm_pred_len10_fps120_{date}
   resume: false
   use_wandb: false
   device: cuda
@@ -56,3 +56,6 @@ model:
   kernel_size: 3
   n_groups: 8
   cond_predict_scale: false
+  use_time_token: true
+  use_segment_embedding: true
+  use_local_condition: false

@@ -55,6 +55,9 @@ def main() -> None:
         n_groups=int(model_cfg.get("n_groups", 8)),
         cond_predict_scale=bool(model_cfg.get("cond_predict_scale", False)),
         condition_summary=str(model_cfg.get("condition_summary", "flatten")),
+        use_time_token=bool(model_cfg.get("use_time_token", False)),
+        use_segment_embedding=bool(model_cfg.get("use_segment_embedding", False)),
+        use_local_condition=bool(model_cfg.get("use_local_condition", False)),
     ).to(device)
     model.load_state_dict(ckpt["model"])
     model.eval()
