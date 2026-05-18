@@ -67,11 +67,11 @@ class Trainer:
         batch_size = target.shape[0]
         timesteps = self.diffusion.sample_timesteps(batch_size, target.device)  # [B]
         noise = torch.randn_like(target)  # [B, K, 65]
-        xt = self.diffusion.add_noise(target, noise, timesteps)  # [B, K, 65]
-        eps_hat = self.diffusion.model(xt, cond, timesteps)  # [B, K, 65]
+        xt = self.diffusion.add_noise(target, noise, timesteps)  # [B, K, 65], create noisy input using scheduler
+        eps_hat = self.diffusion.model(xt, cond, timesteps)  # [B, K, 65], predict the initial noise using model
         noise_loss = F.mse_loss(eps_hat, noise)
 
-        x0_pred = self.diffusion.predict_x0_from_eps(xt, timesteps, eps_hat)  # [B, K, 65]
+        x0_pred = self.diffusion.predict_x0_from_eps(xt, timesteps, eps_hat)  # [B, K, 65], predict x0 using scheduler
         aux_max_timestep = self.cfg["training"].get("auxiliary_max_timestep")
         if aux_max_timestep is not None:
             aux_mask = timesteps <= int(aux_max_timestep)

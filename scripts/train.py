@@ -178,6 +178,7 @@ def main() -> None:
         frame_dim=int(data_cfg["frame_dim"]),
         samples_per_epoch=cfg["training"].get("train_samples_per_epoch"),
         random_window_sampling=bool(cfg["training"].get("random_window_sampling", False)),
+        root_relative=bool(data_cfg.get("root_relative", False)),
     )
     val_dataset = MotionChunkDataset(
         val_paths,
@@ -189,6 +190,7 @@ def main() -> None:
         frame_dim=int(data_cfg["frame_dim"]),
         samples_per_epoch=cfg["training"].get("val_samples_per_epoch"),
         random_window_sampling=False,
+        root_relative=bool(data_cfg.get("root_relative", False)),
     )
     print(
         "[data] "

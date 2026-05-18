@@ -12,7 +12,7 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
-from datasets.motion_chunk_dataset import load_stats
+from datasets.motion_chunk_dataset import load_stats, make_root_relative
 from diffusion.scheduler_wrapper import DiffusionSchedulerWrapper
 from models.denoiser import ConditionalDenoiser
 
@@ -66,6 +66,8 @@ def main() -> None:
     if cond_np.ndim != 2 or cond_np.shape[1] != int(data_cfg["frame_dim"]):
         raise ValueError(f"condition must have shape [H, 65] or [T, 65], got {cond_np.shape}")
     cond_np = cond_np[-int(data_cfg["history_len"]) :]  # [H, 65]
+    if bool(data_cfg.get("root_relative", False)):
+        cond_np, _ = make_root_relative(cond_np, np.empty((0, int(data_cfg["frame_dim"])), dtype=np.float32))
     mean, std = load_stats(data_cfg["stats_path"])
     cond_np = (cond_np - mean) / std
     cond = torch.from_numpy(cond_np[None]).to(device)  # [1, H, 65]

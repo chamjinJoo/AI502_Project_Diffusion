@@ -27,8 +27,11 @@ from test_smoke import (
     test_processed_manifest_stale_assumed_fps_guard,
     test_reconstruct_joint_vel_single_frame,
     test_reconstruct_joint_vel_uses_fps,
+    test_root_relative_current_frame_pose_is_identity,
+    test_dataset_root_relative_shapes_and_values,
     test_reference_quality_reports_seam_metrics,
     test_transformer_denoiser_backward_compat_output_shape,
+    test_transformer_denoiser_raw_history_output_shape,
     test_velocity_consistency_uses_normalized_velocity_space,
     test_continuity_loss_penalizes_velocity_seam,
 )
@@ -39,6 +42,9 @@ def main() -> None:
         test_dataset_slicing(Path(tmp))
     with TemporaryDirectory() as tmp:
         test_dataset_uses_mmap_and_returns_float32(Path(tmp))
+    test_root_relative_current_frame_pose_is_identity()
+    with TemporaryDirectory() as tmp:
+        test_dataset_root_relative_shapes_and_values(Path(tmp))
     test_add_noise_output_shape()
     test_auxiliary_losses_use_fps_and_stats()
     test_ddim_sampler_output_shape()
@@ -47,6 +53,7 @@ def main() -> None:
     test_conditional_unet_denoiser_output_shape()
     test_conditional_unet_mean_summary_backward_compat_output_shape()
     test_transformer_denoiser_backward_compat_output_shape()
+    test_transformer_denoiser_raw_history_output_shape()
     test_velocity_consistency_uses_normalized_velocity_space()
     test_continuity_loss_penalizes_velocity_seam()
     test_reconstruct_joint_vel_uses_fps()

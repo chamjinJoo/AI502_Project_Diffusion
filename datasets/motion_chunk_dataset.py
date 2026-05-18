@@ -12,6 +12,8 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
+from utils.quaternion_utils import normalize_quat, quat_conjugate, quat_multiply, quat_rotate_inverse
+
 
 FRAME_DIM = 65
 
@@ -35,6 +37,26 @@ def _load_sequences(paths: list[Path], frame_dim: int = FRAME_DIM) -> list[np.nd
             raise ValueError(f"{path} must have shape [T, {frame_dim}], got {array.shape}")
         sequences.append(array.astype(np.float32, copy=False))
     return sequences
+
+
+def make_root_relative(cond: np.ndarray, target: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Express body pose channels relative to the last history frame.
+
+    The input chunks are source-global [H, 65] and [K, 65]. Joint position and
+    velocity channels are left unchanged; only body_quat/body_pos are converted.
+    """
+    cond_rel = np.asarray(cond, dtype=np.float32).copy()
+    target_rel = np.asarray(target, dtype=np.float32).copy()
+    anchor_quat = normalize_quat(cond_rel[-1:, 58:62])[0][0]  # [4], wxyz
+    anchor_pos = cond_rel[-1, 62:65].copy()  # [3]
+    anchor_inv = quat_conjugate(anchor_quat)  # [4]
+
+    for chunk in (cond_rel, target_rel):
+        if chunk.shape[0] == 0:
+            continue
+        chunk[:, 62:65] = quat_rotate_inverse(anchor_quat, chunk[:, 62:65] - anchor_pos)
+        chunk[:, 58:62] = normalize_quat(quat_multiply(anchor_inv, chunk[:, 58:62]))[0]
+    return cond_rel.astype(np.float32), target_rel.astype(np.float32)
 
 
 def find_motion_files(data_dir: str | Path, frame_dim: int = FRAME_DIM) -> list[Path]:
@@ -95,6 +117,7 @@ class MotionChunkDataset(Dataset[dict[str, torch.Tensor]]):
         frame_dim: int = FRAME_DIM,
         samples_per_epoch: int | None = None,
         random_window_sampling: bool = False,
+        root_relative: bool = False,
     ) -> None:
         """Build sliding windows.
 
@@ -117,6 +140,7 @@ class MotionChunkDataset(Dataset[dict[str, torch.Tensor]]):
         self.normalize = normalize
         self.samples_per_epoch = samples_per_epoch
         self.random_window_sampling = random_window_sampling
+        self.root_relative = root_relative
         self.sequences = _load_sequences(self.paths, frame_dim=frame_dim)
 
         if mean is None or std is None:
@@ -179,6 +203,8 @@ class MotionChunkDataset(Dataset[dict[str, torch.Tensor]]):
         sequence = self.sequences[seq_idx]
         cond = sequence[t - self.history_len + 1 : t + 1]  # [H, 65]
         target = sequence[t + 1 : t + 1 + self.pred_len]  # [K, 65]
+        if self.root_relative:
+            cond, target = make_root_relative(cond, target)
         return {
             "cond": torch.from_numpy(self._normalize(cond)),  # [H, 65]
             "target": torch.from_numpy(self._normalize(target)),  # [K, 65]

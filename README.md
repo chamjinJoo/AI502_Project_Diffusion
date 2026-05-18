@@ -92,13 +92,12 @@ processed_dataset/*  # except processed_dataset/stats/stats.json
 exports/
 ```
 
-The repository does include a small curated set of candidate checkpoints,
-example future-reference samples, and the training normalization stats needed
-for sampling:
+The repository includes one curated root-relative checkpoint, a few example
+future-reference samples, and the normalization stats needed for sampling:
 
 ```text
-checkpoints/pred_len10/
-samples/pred_len10/
+checkpoints/pred_len10/transformer_mdm_root_relative.pt
+samples/pred_len10/transformer_mdm_root_relative/
 processed_dataset/stats/stats.json
 ```
 
@@ -160,10 +159,21 @@ processed_dataset/manifests/val_manifest.jsonl
 processed_dataset/stats/stats.json
 ```
 
-`processed_dataset/stats/stats.json` stores the per-dimension training-set
-normalization mean/std for the fixed 65D representation. It is not a summary of
-model-generated outputs. The released checkpoints expect this file for condition
-normalization during sampling and for denormalizing generated chunks.
+`processed_dataset/stats/stats.json` stores the window-level normalization stats used by the current root-relative default config. It is not a summary of model-generated outputs; the checkpoint expects this file for condition normalization and denormalizing generated chunks.
+
+## Root-Relative Pose Convention
+
+Raw `processed_dataset/sequences/*.npy` files remain in the source/global root-pose coordinate system. For training, `data.root_relative: true` converts each sampled window dynamically inside `MotionChunkDataset` before normalization:
+
+```text
+anchor = cond[-1]
+body_pos_rel[i]  = R_anchor^-1 * (body_pos[i] - body_pos_anchor)
+body_quat_rel[i] = inverse(body_quat_anchor) * body_quat[i]
+```
+
+The last history frame becomes approximately identity pose: `body_pos=[0,0,0]`, `body_quat=[1,0,0,0]`.
+
+During inference, `scripts/sample.py` applies the same condition-history conversion when the checkpoint config contains `data.root_relative: true`. Generated future chunks from such checkpoints are current-frame-relative references.
 
 ## Diffusion Model Source
 
@@ -224,28 +234,20 @@ training:
 
 The auxiliary losses are deliberately small. The main objective remains epsilon-prediction MSE, while the auxiliary terms lightly encourage velocity consistency, unit quaternions, and continuity from the last history frame.
 
-Curated Transformer checkpoint candidates:
+Recommended checkpoint:
 
 ```text
-checkpoints/pred_len10/transformer_mdm_style.pt
-checkpoints/pred_len10/transformer_baseline.pt
-checkpoints/pred_len10/transformer_velocity_consistent.pt
+checkpoints/pred_len10/transformer_mdm_root_relative.pt
 ```
 
-`transformer_mdm_style.pt` is the recommended `pred_len=10` checkpoint. It uses the MDM-inspired timestep token and segment embeddings and gave the best offline reference-quality metrics among the current candidates.
-
-`transformer_baseline.pt` is the older Transformer baseline kept for comparison.
-
-`transformer_velocity_consistent.pt` was trained with a small velocity
-consistency auxiliary term. It is useful as an A/B rollout candidate when smooth velocity/reference consistency matters.
+This is the current `pred_len=10` root-relative MDM-style Transformer checkpoint.
+It uses the MDM-inspired timestep token and segment embeddings, and expects
+`processed_dataset/stats/stats.json` for normalization.
 
 Example generated chunks are included under:
 
 ```text
-samples/pred_len10/transformer_mdm_style/
-samples/pred_len10/transformer_baseline/
-samples/pred_len10/transformer_velocity_consistent/
-samples/pred_len10/candidate_comparison.json
+samples/pred_len10/transformer_mdm_root_relative/
 ```
 
 These samples keep the model-predicted `joint_vel` channels. That is the
@@ -282,12 +284,6 @@ Train the default MDM-style Transformer configuration:
 python scripts/train.py --config configs/default.yaml
 ```
 
-The same configuration is also saved explicitly as:
-
-```bash
-python scripts/train.py --config configs/transformer_mdm.yaml
-```
-
 The experimental Diffusion Policy style UNet configuration is:
 
 ```bash
@@ -297,7 +293,7 @@ python scripts/train.py --config configs/unet_diffusion_policy.yaml
 `training.checkpoint_dir` may contain date tokens that are expanded at train launch time:
 
 ```yaml
-checkpoint_dir: checkpoints/transformer_mdm_pred_len10_fps120_{date}
+checkpoint_dir: checkpoints/transformer_mdm_rootrel_pred_len10_fps120_{date}
 ```
 
 Supported tokens are `{date}` -> `YYYYMMDD` and `{datetime}` -> `YYYYMMDD_HHMMSS`.
@@ -310,7 +306,7 @@ Sample from a condition history:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/pred_len10/transformer_mdm_style.pt \
+  --checkpoint checkpoints/pred_len10/transformer_mdm_root_relative.pt \
   --cond path/to/cond_history.npy \
   --num_inference_steps 50 \
   --denormalize \
@@ -322,7 +318,7 @@ Sample with externally supplied initial noise `x_T`:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/pred_len10/transformer_mdm_style.pt \
+  --checkpoint checkpoints/pred_len10/transformer_mdm_root_relative.pt \
   --cond path/to/cond_history.npy \
   --x_T path/to/initial_noise_x_T.npy \
   --num_inference_steps 50 \
@@ -336,22 +332,14 @@ By default, use the model-predicted `joint_vel` channels. `--reconstruct_velocit
 --fps 50` can replace them with finite differences of predicted joint positions,
 but this may amplify noise if the generated joint positions are not smooth.
 
-Included sample outputs from the candidate checkpoints:
+Included sample outputs from the recommended root-relative checkpoint:
 
 ```text
-samples/pred_len10/transformer_mdm_style/sample_00_future.npy
-samples/pred_len10/transformer_mdm_style/sample_01_future.npy
-samples/pred_len10/transformer_mdm_style/sample_02_future.npy
-samples/pred_len10/transformer_mdm_style/sample_03_future.npy
-samples/pred_len10/transformer_baseline/sample_00_future.npy
-samples/pred_len10/transformer_baseline/sample_01_future.npy
-samples/pred_len10/transformer_baseline/sample_02_future.npy
-samples/pred_len10/transformer_baseline/sample_03_future.npy
-samples/pred_len10/transformer_velocity_consistent/sample_00_future.npy
-samples/pred_len10/transformer_velocity_consistent/sample_01_future.npy
-samples/pred_len10/transformer_velocity_consistent/sample_02_future.npy
-samples/pred_len10/transformer_velocity_consistent/sample_03_future.npy
-samples/pred_len10/candidate_comparison.json
+samples/pred_len10/transformer_mdm_root_relative/sample_00_future.npy
+samples/pred_len10/transformer_mdm_root_relative/sample_01_future.npy
+samples/pred_len10/transformer_mdm_root_relative/sample_02_future.npy
+samples/pred_len10/transformer_mdm_root_relative/sample_03_future.npy
+samples/pred_len10/transformer_mdm_root_relative/evaluation_summary.json
 ```
 
 ## Export CSV

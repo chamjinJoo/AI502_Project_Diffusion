@@ -10,7 +10,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from datasets.motion_chunk_dataset import MotionChunkDataset
+from datasets.motion_chunk_dataset import MotionChunkDataset, make_root_relative
 from data_prep.convert_bones_seed_to_internal import convert_one_csv
 from diffusion.scheduler_wrapper import DiffusionSchedulerWrapper
 from models.denoiser import ConditionalDenoiser
@@ -68,6 +68,46 @@ def test_dataset_uses_mmap_and_returns_float32(tmp_path: Path) -> None:
     assert item["target"].shape == (3, 65)
     assert item["cond"].dtype == torch.float32
     assert item["target"].dtype == torch.float32
+
+
+def test_root_relative_current_frame_pose_is_identity() -> None:
+    cond = np.zeros((4, 65), dtype=np.float32)
+    target = np.zeros((3, 65), dtype=np.float32)
+    identity = np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float32)
+    yaw_90 = np.array([np.sqrt(0.5), 0.0, 0.0, np.sqrt(0.5)], dtype=np.float32)
+    cond[:, 58:62] = identity
+    target[:, 58:62] = yaw_90
+    cond[-1, 58:62] = yaw_90
+    cond[-1, 62:65] = np.array([1.0, 2.0, 3.0], dtype=np.float32)
+    target[0, 62:65] = np.array([2.0, 2.0, 3.0], dtype=np.float32)
+
+    cond_rel, target_rel = make_root_relative(cond, target)
+
+    np.testing.assert_allclose(cond_rel[-1, 62:65], np.zeros(3, dtype=np.float32), atol=1e-6)
+    np.testing.assert_allclose(cond_rel[-1, 58:62], identity, atol=1e-6)
+    # With current yaw +90deg, a world +x displacement is local -y.
+    np.testing.assert_allclose(target_rel[0, 62:65], np.array([0.0, -1.0, 0.0], dtype=np.float32), atol=1e-5)
+    np.testing.assert_allclose(target_rel[0, 58:62], identity, atol=1e-6)
+
+
+def test_dataset_root_relative_shapes_and_values(tmp_path: Path) -> None:
+    seq = np.zeros((12, 65), dtype=np.float32)
+    seq[:, 58] = 1.0
+    yaw_90 = np.array([np.sqrt(0.5), 0.0, 0.0, np.sqrt(0.5)], dtype=np.float32)
+    seq[3:, 58:62] = yaw_90
+    seq[3, 62:65] = np.array([1.0, 2.0, 3.0], dtype=np.float32)
+    seq[4, 62:65] = np.array([2.0, 2.0, 3.0], dtype=np.float32)
+    path = tmp_path / "seq.npy"
+    np.save(path, seq)
+
+    dataset = MotionChunkDataset(path, history_len=4, pred_len=3, split="all", normalize=False, root_relative=True)
+    item = dataset[0]
+
+    assert item["cond"].shape == (4, 65)
+    assert item["target"].shape == (3, 65)
+    np.testing.assert_allclose(item["cond"][-1, 62:65].numpy(), np.zeros(3, dtype=np.float32), atol=1e-6)
+    np.testing.assert_allclose(item["cond"][-1, 58:62].numpy(), np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float32), atol=1e-6)
+    np.testing.assert_allclose(item["target"][0, 62:65].numpy(), np.array([0.0, -1.0, 0.0], dtype=np.float32), atol=1e-5)
 
 
 def test_add_noise_output_shape() -> None:
@@ -195,6 +235,27 @@ def test_transformer_denoiser_backward_compat_output_shape() -> None:
         dropout=0.0,
         condition_encoder="conv",
         architecture="transformer",
+    )
+    xt = torch.randn(2, 3, 65)
+    cond = torch.randn(2, 4, 65)
+    timesteps = torch.tensor([0, 7], dtype=torch.long)
+    out = model(xt, cond, timesteps)
+    assert out.shape == (2, 3, 65)
+
+
+def test_transformer_denoiser_raw_history_output_shape() -> None:
+    model = ConditionalDenoiser(
+        frame_dim=65,
+        history_len=4,
+        pred_len=3,
+        model_dim=32,
+        num_layers=1,
+        num_heads=4,
+        dropout=0.0,
+        condition_encoder="linear",
+        architecture="transformer",
+        use_time_token=True,
+        use_segment_embedding=True,
     )
     xt = torch.randn(2, 3, 65)
     cond = torch.randn(2, 4, 65)

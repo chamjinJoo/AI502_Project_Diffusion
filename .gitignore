@@ -13,26 +13,43 @@ env/
 .env
 .env.*
 
-# Large datasets and generated artifacts
-data/
-processed_dataset/*
-!processed_dataset/stats/
-processed_dataset/stats/*
-!processed_dataset/stats/stats.json
-checkpoints/
-trained_model/
-samples/
-exports/
-slurms/logs/
-*.sbatch
-AI502TermProject/
-
 # Model and array artifacts
 *.pt
 *.pth
 *.ckpt
 *.npy
 *.npz
+
+# Large datasets and generated artifacts
+data/
+processed_dataset/*
+!processed_dataset/stats/
+processed_dataset/stats/*
+!processed_dataset/stats/stats.json
+checkpoints/*
+!checkpoints/pred_len10/
+!checkpoints/pred_len10/README.md
+!checkpoints/pred_len10/transformer_mdm_root_relative.pt
+trained_model/
+samples/*
+!samples/pred_len10/
+!samples/pred_len10/README.md
+!samples/pred_len10/transformer_mdm_root_relative/
+!samples/pred_len10/transformer_mdm_root_relative/*.npy
+!samples/pred_len10/transformer_mdm_root_relative/evaluation_summary.json
+exports/
+slurms/logs/
+*.sbatch
+
+# External term-project trees are kept out of this diffusion-only repo.
+AI502TermProject/
+AI502TermProject-main/
+decoupled_wbc/
+diffusion_tracking_manager/
+gear_sonic/
+gear_sonic_deploy/
+motionbricks/
+external_dependencies/
 
 # Logs and temporary files
 *.log

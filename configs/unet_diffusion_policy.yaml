@@ -15,6 +15,7 @@ data:
   frame_dim: 65
   fps: 50
   source_fps_if_assumed: 120
+  root_relative: true
   history_len: 20
   pred_len: 10
 

@@ -6,6 +6,17 @@ import torch
 from torch import nn
 
 
+class LinearConditionEncoder(nn.Module):
+    """Frame-wise projection with no temporal mixing before the denoiser."""
+
+    def __init__(self, frame_dim: int, model_dim: int) -> None:
+        super().__init__()
+        self.net = nn.Sequential(nn.Linear(frame_dim, model_dim), nn.LayerNorm(model_dim))
+
+    def forward(self, cond: torch.Tensor) -> torch.Tensor:
+        return self.net(cond)  # [B, H, D]
+
+
 class ConvConditionEncoder(nn.Module):
     """Small Conv1D temporal encoder for condition history."""
 
@@ -50,7 +61,7 @@ class TransformerConditionEncoder(nn.Module):
 
 
 class ConditionEncoder(nn.Module):
-    """Dispatch wrapper for Conv1D or Transformer condition encoders."""
+    """Dispatch wrapper for linear, Conv1D, or Transformer history encoders."""
 
     def __init__(
         self,
@@ -62,12 +73,14 @@ class ConditionEncoder(nn.Module):
         encoder_type: str = "transformer",
     ) -> None:
         super().__init__()
-        if encoder_type == "conv":
+        if encoder_type in {"linear", "raw"}:
+            self.encoder = LinearConditionEncoder(frame_dim, model_dim)
+        elif encoder_type == "conv":
             self.encoder = ConvConditionEncoder(frame_dim, model_dim, dropout)
         elif encoder_type == "transformer":
             self.encoder = TransformerConditionEncoder(frame_dim, model_dim, num_layers, num_heads, dropout)
         else:
-            raise ValueError("encoder_type must be 'conv' or 'transformer'")
+            raise ValueError("encoder_type must be 'linear', 'raw', 'conv', or 'transformer'")
 
     def forward(self, cond: torch.Tensor) -> torch.Tensor:
         return self.encoder(cond)  # [B, H, D]
