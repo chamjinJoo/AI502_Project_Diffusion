@@ -1,0 +1,81 @@
+{
+  "transformer_baseline": {
+    "checkpoint": "checkpoints/pred_len10/transformer_baseline.pt",
+    "description": "Default Transformer epsilon-prediction DDIM model.",
+    "metrics": {
+      "full_mse": 0.017789941281080246,
+      "joint_pos_mse": 0.00021394937357399613,
+      "joint_vel_mse": 0.039390694350004196,
+      "body_quat_mse": 0.0002176350972149521,
+      "body_pos_mse": 0.002313644625246525,
+      "quaternion_norm_error": 2.3003668303545055e-08,
+      "norm_full_mse": 0.02019055001437664,
+      "norm_joint_pos_mse": 0.0029128724709153175,
+      "norm_joint_vel_mse": 0.04152856394648552,
+      "norm_body_quat_mse": 0.005238684825599194,
+      "norm_body_pos_mse": 0.0008764357189647853,
+      "finite": 1.0,
+      "quat_norm_min": 0.9999998807907104,
+      "quat_norm_max": 1.0000001192092896,
+      "vel_fd_mse": 0.30307286977767944,
+      "seam_pos_rmse": 0.008391926065087318,
+      "seam_expected_rmse": 0.008472169749438763,
+      "mean_step_joint_pos_rmse": 0.010743160732090473,
+      "mean_body_step_norm": 0.09466090053319931,
+      "max_abs": 7.694157123565674
+    }
+  },
+  "transformer_velocity_consistent": {
+    "checkpoint": "checkpoints/pred_len10/transformer_velocity_consistent.pt",
+    "description": "Transformer model with a small velocity-consistency auxiliary term.",
+    "metrics": {
+      "full_mse": 0.01882215403020382,
+      "joint_pos_mse": 0.00020672679238487035,
+      "joint_vel_mse": 0.041654739528894424,
+      "body_quat_mse": 0.00014678158913739026,
+      "body_pos_mse": 0.0029567221645265818,
+      "quaternion_norm_error": 2.1606684441621837e-08,
+      "norm_full_mse": 0.020392095670104027,
+      "norm_joint_pos_mse": 0.0026996666565537453,
+      "norm_joint_vel_mse": 0.042176954448223114,
+      "norm_body_quat_mse": 0.005204968154430389,
+      "norm_body_pos_mse": 0.001081505324691534,
+      "finite": 1.0,
+      "quat_norm_min": 0.9999998807907104,
+      "quat_norm_max": 1.0000001192092896,
+      "vel_fd_mse": 0.1901586651802063,
+      "seam_pos_rmse": 0.008028062991797924,
+      "seam_expected_rmse": 0.008106086403131485,
+      "mean_step_joint_pos_rmse": 0.0084967827424407,
+      "mean_body_step_norm": 0.10335464030504227,
+      "max_abs": 7.317492485046387
+    }
+  },
+  "transformer_mdm_style": {
+    "checkpoint": "checkpoints/pred_len10/transformer_mdm_style.pt",
+    "description": "MDM-inspired Transformer with a diffusion timestep token and history/target segment embeddings. Recommended default candidate.",
+    "metrics": {
+      "full_mse": 0.012866923585534096,
+      "joint_pos_mse": 0.00014386660768650472,
+      "joint_vel_mse": 0.02847488410770893,
+      "body_quat_mse": 8.520886331098154e-05,
+      "body_pos_mse": 0.002021808410063386,
+      "quaternion_norm_error": 1.6950071568544445e-08,
+      "norm_full_mse": 0.013186868280172348,
+      "norm_joint_pos_mse": 0.0020947677548974752,
+      "norm_joint_vel_mse": 0.026771919801831245,
+      "norm_body_quat_mse": 0.004402036778628826,
+      "norm_body_pos_mse": 0.0008014845079742372,
+      "vel_fd_mse": 0.25845757126808167,
+      "mean_step_joint_pos_rmse": 0.010738502256572247,
+      "quat_norm_min": 0.9999998807907104,
+      "quat_norm_max": 1.0000001192092896,
+      "finite": 1.0,
+      "max_abs": 10.119760513305664,
+      "seam_pos_rmse": 0.007882327772676945,
+      "seam_expected_rmse": 0.00802505761384964,
+      "seam_velocity_mse": 0.1554105132818222,
+      "first_velocity_mse_to_history": 0.0023931197356432676
+    }
+  }
+}
