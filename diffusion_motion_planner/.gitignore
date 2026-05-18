@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments and local config
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Large datasets and generated artifacts
+data/
+processed_dataset/*
+!processed_dataset/stats/
+processed_dataset/stats/*
+!processed_dataset/stats/stats.json
+checkpoints/*
+!checkpoints/pred_len10/
+!checkpoints/pred_len10/README.md
+!checkpoints/pred_len10/transformer_mdm_root_relative.pt
+trained_model/
+samples/*
+!samples/pred_len10/
+!samples/pred_len10/README.md
+!samples/pred_len10/transformer_mdm_root_relative/
+!samples/pred_len10/transformer_mdm_root_relative/*.npy
+!samples/pred_len10/transformer_mdm_root_relative/evaluation_summary.json
+exports/
+slurms/logs/
+*.sbatch
+AI502TermProject/
+
+# Model and array artifacts
+*.pt
+*.pth
+*.ckpt
+*.npy
+*.npz
+
+# Logs and temporary files
+*.log
+*.out
+*.err
+*.tmp
+tmp/
+workcache/
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/
