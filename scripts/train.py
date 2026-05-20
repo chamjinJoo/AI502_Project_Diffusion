@@ -179,6 +179,9 @@ def main() -> None:
         samples_per_epoch=cfg["training"].get("train_samples_per_epoch"),
         random_window_sampling=bool(cfg["training"].get("random_window_sampling", False)),
         root_relative=bool(data_cfg.get("root_relative", False)),
+        fps=float(data_cfg.get("fps", 50.0)),
+        joint_vel_mode=str(data_cfg.get("joint_vel_mode", "source")),
+        body_pos_mode=str(data_cfg.get("body_pos_mode", "relative")),
     )
     val_dataset = MotionChunkDataset(
         val_paths,
@@ -191,6 +194,9 @@ def main() -> None:
         samples_per_epoch=cfg["training"].get("val_samples_per_epoch"),
         random_window_sampling=False,
         root_relative=bool(data_cfg.get("root_relative", False)),
+        fps=float(data_cfg.get("fps", 50.0)),
+        joint_vel_mode=str(data_cfg.get("joint_vel_mode", "source")),
+        body_pos_mode=str(data_cfg.get("body_pos_mode", "relative")),
     )
     print(
         "[data] "
@@ -222,6 +228,10 @@ def main() -> None:
     )
 
     model_cfg = cfg["model"]
+    conditioning_mode = str(model_cfg.get("conditioning_mode", cfg.get("conditioning_mode", "history")))
+    architecture = str(model_cfg.get("architecture", "unet"))
+    if conditioning_mode == "prefix" and architecture != "transformer":
+        raise ValueError("conditioning_mode='prefix' is currently supported only with model.architecture='transformer'")
     model = ConditionalDenoiser(
         frame_dim=int(data_cfg["frame_dim"]),
         history_len=int(data_cfg["history_len"]),
@@ -231,7 +241,7 @@ def main() -> None:
         num_heads=int(model_cfg["num_heads"]),
         dropout=float(model_cfg["dropout"]),
         condition_encoder=str(model_cfg["condition_encoder"]),
-        architecture=str(model_cfg.get("architecture", "unet")),
+        architecture=architecture,
         down_dims=tuple(int(dim) for dim in model_cfg.get("down_dims", [256, 512, 1024])),
         kernel_size=int(model_cfg.get("kernel_size", 3)),
         n_groups=int(model_cfg.get("n_groups", 8)),
@@ -251,7 +261,14 @@ def main() -> None:
         velocity_loss_weight=float(cfg["training"]["velocity_loss_weight"]),
         quaternion_loss_weight=float(cfg["training"]["quaternion_loss_weight"]),
         continuity_loss_weight=float(cfg["training"].get("continuity_loss_weight", 0.0)),
+        joint_x0_loss_weight=float(cfg["training"].get("joint_x0_loss_weight", 0.0)),
+        acceleration_loss_weight=float(cfg["training"].get("acceleration_loss_weight", 0.0)),
         fps=float(data_cfg.get("fps", 50.0)),
+        conditioning_mode=conditioning_mode,
+        objective=str(diffusion_cfg.get("objective", "epsilon")),
+        flow_solver=str(diffusion_cfg.get("flow_solver", "euler")),
+        joint_vel_mode=str(data_cfg.get("joint_vel_mode", "source")),
+        body_pos_mode=str(data_cfg.get("body_pos_mode", "relative")),
     )
     diffusion.set_normalization_stats(torch.from_numpy(train_dataset.mean), torch.from_numpy(train_dataset.std))
 

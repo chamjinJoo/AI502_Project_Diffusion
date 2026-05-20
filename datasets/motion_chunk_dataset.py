@@ -9,13 +9,25 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import torch
-from torch.utils.data import Dataset
+
+try:
+    import torch
+    from torch.utils.data import Dataset
+except ImportError:  # Allows preprocessing utilities to run in environments without a working torch import.
+    torch = None  # type: ignore[assignment]
+
+    class Dataset:  # type: ignore[no-redef]
+        def __class_getitem__(cls, item: object) -> type["Dataset"]:
+            return cls
 
 from utils.quaternion_utils import normalize_quat, quat_conjugate, quat_multiply, quat_rotate_inverse
 
 
 FRAME_DIM = 65
+JOINT_POS_SLICE = slice(0, 29)
+JOINT_VEL_SLICE = slice(29, 58)
+BODY_QUAT_SLICE = slice(58, 62)
+BODY_POS_SLICE = slice(62, 65)
 
 
 def _as_paths(paths: str | Path | list[str | Path]) -> list[Path]:
@@ -47,16 +59,112 @@ def make_root_relative(cond: np.ndarray, target: np.ndarray) -> tuple[np.ndarray
     """
     cond_rel = np.asarray(cond, dtype=np.float32).copy()
     target_rel = np.asarray(target, dtype=np.float32).copy()
-    anchor_quat = normalize_quat(cond_rel[-1:, 58:62])[0][0]  # [4], wxyz
-    anchor_pos = cond_rel[-1, 62:65].copy()  # [3]
+    anchor_quat = normalize_quat(cond_rel[-1:, BODY_QUAT_SLICE])[0][0]  # [4], wxyz
+    anchor_pos = cond_rel[-1, BODY_POS_SLICE].copy()  # [3]
     anchor_inv = quat_conjugate(anchor_quat)  # [4]
 
     for chunk in (cond_rel, target_rel):
         if chunk.shape[0] == 0:
             continue
-        chunk[:, 62:65] = quat_rotate_inverse(anchor_quat, chunk[:, 62:65] - anchor_pos)
-        chunk[:, 58:62] = normalize_quat(quat_multiply(anchor_inv, chunk[:, 58:62]))[0]
+        chunk[:, BODY_POS_SLICE] = quat_rotate_inverse(anchor_quat, chunk[:, BODY_POS_SLICE] - anchor_pos)
+        chunk[:, BODY_QUAT_SLICE] = normalize_quat(quat_multiply(anchor_inv, chunk[:, BODY_QUAT_SLICE]))[0]
     return cond_rel.astype(np.float32), target_rel.astype(np.float32)
+
+
+def apply_model_space_transforms(
+    cond: np.ndarray,
+    target: np.ndarray,
+    *,
+    fps: float = 50.0,
+    joint_vel_mode: str = "source",
+    body_pos_mode: str = "relative",
+) -> tuple[np.ndarray, np.ndarray]:
+    """Apply training-space transforms after optional root-relative conversion.
+
+    Args:
+        cond: History chunk with shape [H, 65].
+        target: Future chunk with shape [K, 65].
+        fps: Frame rate used for finite-difference joint velocities.
+        joint_vel_mode: "source" keeps velocity channels as stored, while
+            "finite_difference" replaces them from joint_pos differences.
+        body_pos_mode: "relative" keeps root-relative body_pos, while "delta"
+            stores per-frame root displacement. Future deltas start from cond[-1].
+    """
+    if joint_vel_mode not in {"source", "finite_difference"}:
+        raise ValueError("joint_vel_mode must be 'source' or 'finite_difference'")
+    if body_pos_mode not in {"relative", "delta"}:
+        raise ValueError("body_pos_mode must be 'relative' or 'delta'")
+
+    cond_out = np.asarray(cond, dtype=np.float32).copy()
+    target_out = np.asarray(target, dtype=np.float32).copy()
+
+    if joint_vel_mode == "finite_difference":
+        chunks = [cond_out, target_out] if target_out.shape[0] else [cond_out]
+        full = np.concatenate(chunks, axis=0)  # [H+K, 65] or [H, 65]
+        joint_pos = full[:, JOINT_POS_SLICE]
+        joint_vel = np.zeros_like(joint_pos, dtype=np.float32)
+        if joint_pos.shape[0] > 1:
+            joint_vel[1:] = (joint_pos[1:] - joint_pos[:-1]) * float(fps)
+            joint_vel[0] = joint_vel[1]
+        full[:, JOINT_VEL_SLICE] = joint_vel
+        cond_out = full[: cond_out.shape[0]].copy()
+        if target_out.shape[0]:
+            target_out = full[cond_out.shape[0] :].copy()
+
+    if body_pos_mode == "delta":
+        cond_pos = cond_out[:, BODY_POS_SLICE].copy()
+        cond_delta = np.zeros_like(cond_pos, dtype=np.float32)
+        if cond_pos.shape[0] > 1:
+            cond_delta[1:] = cond_pos[1:] - cond_pos[:-1]
+        cond_out[:, BODY_POS_SLICE] = cond_delta
+
+        if target_out.shape[0]:
+            target_pos = target_out[:, BODY_POS_SLICE].copy()
+            target_delta = np.zeros_like(target_pos, dtype=np.float32)
+            target_delta[0] = target_pos[0] - cond_pos[-1]
+            if target_pos.shape[0] > 1:
+                target_delta[1:] = target_pos[1:] - target_pos[:-1]
+            target_out[:, BODY_POS_SLICE] = target_delta
+
+    return cond_out.astype(np.float32), target_out.astype(np.float32)
+
+
+def decode_future_model_space(
+    future: np.ndarray,
+    *,
+    fps: float = 50.0,
+    joint_vel_mode: str = "source",
+    body_pos_mode: str = "relative",
+    prev_joint_pos: np.ndarray | None = None,
+) -> np.ndarray:
+    """Decode a denormalized future chunk from model-space to reference-space.
+
+    The returned shape remains [K, 65]. With body_pos_mode="delta", body_pos is
+    cumulatively integrated from the current-frame origin. With
+    joint_vel_mode="finite_difference", joint_vel is reconstructed from joint_pos.
+    """
+    if joint_vel_mode not in {"source", "finite_difference"}:
+        raise ValueError("joint_vel_mode must be 'source' or 'finite_difference'")
+    if body_pos_mode not in {"relative", "delta"}:
+        raise ValueError("body_pos_mode must be 'relative' or 'delta'")
+
+    decoded = np.asarray(future, dtype=np.float32).copy()
+    if body_pos_mode == "delta" and decoded.shape[0] > 0:
+        decoded[:, BODY_POS_SLICE] = np.cumsum(decoded[:, BODY_POS_SLICE], axis=0)
+
+    if joint_vel_mode == "finite_difference":
+        joint_pos = decoded[:, JOINT_POS_SLICE]
+        joint_vel = np.zeros_like(joint_pos, dtype=np.float32)
+        if joint_pos.shape[0] > 0:
+            if prev_joint_pos is not None:
+                joint_vel[0] = (joint_pos[0] - np.asarray(prev_joint_pos, dtype=np.float32)) * float(fps)
+            elif joint_pos.shape[0] > 1:
+                joint_vel[0] = (joint_pos[1] - joint_pos[0]) * float(fps)
+            if joint_pos.shape[0] > 1:
+                joint_vel[1:] = (joint_pos[1:] - joint_pos[:-1]) * float(fps)
+        decoded[:, JOINT_VEL_SLICE] = joint_vel
+
+    return decoded.astype(np.float32)
 
 
 def find_motion_files(data_dir: str | Path, frame_dim: int = FRAME_DIM) -> list[Path]:
@@ -100,7 +208,7 @@ def load_stats(path: str | Path) -> tuple[np.ndarray, np.ndarray]:
     return np.asarray(payload["mean"], dtype=np.float32), np.asarray(payload["std"], dtype=np.float32)
 
 
-class MotionChunkDataset(Dataset[dict[str, torch.Tensor]]):
+class MotionChunkDataset(Dataset):
     """Return history-conditioned future chunks from [T, 65] motion sequences."""
 
     def __init__(
@@ -118,6 +226,9 @@ class MotionChunkDataset(Dataset[dict[str, torch.Tensor]]):
         samples_per_epoch: int | None = None,
         random_window_sampling: bool = False,
         root_relative: bool = False,
+        fps: float = 50.0,
+        joint_vel_mode: str = "source",
+        body_pos_mode: str = "relative",
     ) -> None:
         """Build sliding windows.
 
@@ -141,6 +252,13 @@ class MotionChunkDataset(Dataset[dict[str, torch.Tensor]]):
         self.samples_per_epoch = samples_per_epoch
         self.random_window_sampling = random_window_sampling
         self.root_relative = root_relative
+        self.fps = float(fps)
+        if joint_vel_mode not in {"source", "finite_difference"}:
+            raise ValueError("joint_vel_mode must be 'source' or 'finite_difference'")
+        if body_pos_mode not in {"relative", "delta"}:
+            raise ValueError("body_pos_mode must be 'relative' or 'delta'")
+        self.joint_vel_mode = joint_vel_mode
+        self.body_pos_mode = body_pos_mode
         self.sequences = _load_sequences(self.paths, frame_dim=frame_dim)
 
         if mean is None or std is None:
@@ -197,6 +315,8 @@ class MotionChunkDataset(Dataset[dict[str, torch.Tensor]]):
         return ((chunk - self.mean) / self.std).astype(np.float32)
 
     def __getitem__(self, index: int) -> dict[str, torch.Tensor]:
+        if torch is None:
+            raise RuntimeError("MotionChunkDataset requires a working PyTorch installation for __getitem__.")
         if self.random_window_sampling:
             index = random.randrange(self.total_windows)
         seq_idx, t = self._index_to_window(index % self.total_windows)
@@ -205,6 +325,13 @@ class MotionChunkDataset(Dataset[dict[str, torch.Tensor]]):
         target = sequence[t + 1 : t + 1 + self.pred_len]  # [K, 65]
         if self.root_relative:
             cond, target = make_root_relative(cond, target)
+        cond, target = apply_model_space_transforms(
+            cond,
+            target,
+            fps=self.fps,
+            joint_vel_mode=self.joint_vel_mode,
+            body_pos_mode=self.body_pos_mode,
+        )
         return {
             "cond": torch.from_numpy(self._normalize(cond)),  # [H, 65]
             "target": torch.from_numpy(self._normalize(target)),  # [K, 65]

@@ -29,15 +29,14 @@ processed_dataset/stats/*
 checkpoints/*
 !checkpoints/pred_len10/
 !checkpoints/pred_len10/README.md
-!checkpoints/pred_len10/transformer_mdm_root_relative.pt
+!checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt
 trained_model/
 samples/*
 !samples/pred_len10/
-!samples/pred_len10/README.md
-!samples/pred_len10/transformer_mdm_root_relative/
-!samples/pred_len10/transformer_mdm_root_relative/*.npy
-!samples/pred_len10/transformer_mdm_root_relative/evaluation_summary.json
+!samples/pred_len10/rectified_flow_mdm_root_relative/
+!samples/pred_len10/rectified_flow_mdm_root_relative/*.gif
 exports/
+slurms/
 slurms/logs/
 *.sbatch
 
@@ -58,6 +57,7 @@ external_dependencies/
 *.tmp
 tmp/
 workcache/
+visualization.gif
 
 # OS/editor files
 .DS_Store

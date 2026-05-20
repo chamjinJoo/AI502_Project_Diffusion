@@ -10,7 +10,12 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from datasets.motion_chunk_dataset import MotionChunkDataset, make_root_relative
+from datasets.motion_chunk_dataset import (
+    MotionChunkDataset,
+    apply_model_space_transforms,
+    decode_future_model_space,
+    make_root_relative,
+)
 from data_prep.convert_bones_seed_to_internal import convert_one_csv
 from diffusion.scheduler_wrapper import DiffusionSchedulerWrapper
 from models.denoiser import ConditionalDenoiser
@@ -26,6 +31,31 @@ class ZeroDenoiser(nn.Module):
 
     def forward(self, xt: torch.Tensor, cond: torch.Tensor, timesteps: torch.Tensor) -> torch.Tensor:
         return torch.zeros_like(xt)
+
+
+class PrefixFutureZeroDenoiser(nn.Module):
+    """Tiny prefix-mode model returning only the noisy future suffix."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.dummy = nn.Parameter(torch.zeros(()))
+        self.last_shape: tuple[int, ...] | None = None
+
+    def forward(
+        self,
+        xt: torch.Tensor,
+        cond: torch.Tensor | None,
+        timesteps: torch.Tensor,
+        *,
+        conditioning_mode: str = "history",
+        prefix_len: int | None = None,
+    ) -> torch.Tensor:
+        del timesteps
+        assert conditioning_mode == "prefix"
+        assert cond is None
+        assert prefix_len is not None
+        self.last_shape = tuple(xt.shape)
+        return torch.zeros_like(xt[:, prefix_len:]) + self.dummy * 0.0
 
 
 class TinyDiffusion(nn.Module):
@@ -110,6 +140,64 @@ def test_dataset_root_relative_shapes_and_values(tmp_path: Path) -> None:
     np.testing.assert_allclose(item["target"][0, 62:65].numpy(), np.array([0.0, -1.0, 0.0], dtype=np.float32), atol=1e-5)
 
 
+def test_model_space_finite_difference_velocity_and_body_delta() -> None:
+    cond = np.zeros((3, 65), dtype=np.float32)
+    target = np.zeros((2, 65), dtype=np.float32)
+    cond[:, 0] = np.array([0.0, 1.0, 3.0], dtype=np.float32)
+    target[:, 0] = np.array([6.0, 10.0], dtype=np.float32)
+    cond[:, 62] = np.array([-2.0, -1.0, 0.0], dtype=np.float32)
+    target[:, 62] = np.array([0.5, 1.5], dtype=np.float32)
+
+    cond_m, target_m = apply_model_space_transforms(
+        cond,
+        target,
+        fps=2.0,
+        joint_vel_mode="finite_difference",
+        body_pos_mode="delta",
+    )
+
+    np.testing.assert_allclose(cond_m[:, 29], np.array([2.0, 2.0, 4.0], dtype=np.float32))
+    np.testing.assert_allclose(target_m[:, 29], np.array([6.0, 8.0], dtype=np.float32))
+    np.testing.assert_allclose(cond_m[:, 62], np.array([0.0, 1.0, 1.0], dtype=np.float32))
+    np.testing.assert_allclose(target_m[:, 62], np.array([0.5, 1.0], dtype=np.float32))
+
+    decoded = decode_future_model_space(
+        target_m,
+        fps=2.0,
+        joint_vel_mode="finite_difference",
+        body_pos_mode="delta",
+        prev_joint_pos=cond[-1, :29],
+    )
+    np.testing.assert_allclose(decoded[:, 62], target[:, 62])
+    np.testing.assert_allclose(decoded[:, 29], np.array([6.0, 8.0], dtype=np.float32))
+
+
+def test_dataset_model_space_modes_return_shapes(tmp_path: Path) -> None:
+    seq = np.zeros((12, 65), dtype=np.float32)
+    seq[:, 0] = np.arange(12, dtype=np.float32)
+    seq[:, 58] = 1.0
+    seq[:, 62] = np.arange(12, dtype=np.float32) * 0.1
+    path = tmp_path / "seq.npy"
+    np.save(path, seq)
+
+    dataset = MotionChunkDataset(
+        path,
+        history_len=4,
+        pred_len=3,
+        split="all",
+        normalize=False,
+        root_relative=True,
+        fps=10.0,
+        joint_vel_mode="finite_difference",
+        body_pos_mode="delta",
+    )
+    item = dataset[0]
+    assert item["cond"].shape == (4, 65)
+    assert item["target"].shape == (3, 65)
+    assert item["cond"].dtype == torch.float32
+    np.testing.assert_allclose(item["target"][:, 29].numpy(), np.full(3, 10.0, dtype=np.float32))
+
+
 def test_add_noise_output_shape() -> None:
     diffusion = DiffusionSchedulerWrapper(ZeroDenoiser(), num_train_timesteps=8, beta_schedule="linear")
     x0 = torch.randn(2, 3, 65)
@@ -117,6 +205,43 @@ def test_add_noise_output_shape() -> None:
     t = torch.tensor([0, 7], dtype=torch.long)
     xt = diffusion.add_noise(x0, noise, t)
     assert xt.shape == (2, 3, 65)
+
+def test_rectified_flow_interpolation_and_x0_recovery() -> None:
+    diffusion = DiffusionSchedulerWrapper(
+        ZeroDenoiser(), num_train_timesteps=8, beta_schedule="linear", objective="rectified_flow"
+    )
+    x0 = torch.randn(2, 3, 65)
+    noise = torch.randn_like(x0)
+    t = torch.tensor([0, 7], dtype=torch.long)
+    xt, velocity = diffusion.interpolate_flow(x0, noise, t)
+    assert xt.shape == (2, 3, 65)
+    assert velocity.shape == (2, 3, 65)
+    recovered = diffusion.predict_x0_from_flow(xt, t, velocity)
+    torch.testing.assert_close(recovered, x0)
+
+
+def test_rectified_flow_sampler_output_shape() -> None:
+    sampler = DiffusionSchedulerWrapper(
+        ZeroDenoiser(), num_train_timesteps=8, beta_schedule="linear", objective="rectified_flow"
+    )
+    cond = torch.randn(2, 4, 65)
+    x_t = torch.randn(2, 3, 65)
+    out = sampler.sample(cond, pred_len=3, frame_dim=65, num_inference_steps=4, x_T=x_t)
+    assert out.shape == (2, 3, 65)
+
+
+def test_rectified_flow_heun_sampler_output_shape() -> None:
+    sampler = DiffusionSchedulerWrapper(
+        ZeroDenoiser(),
+        num_train_timesteps=8,
+        beta_schedule="linear",
+        objective="rectified_flow",
+        flow_solver="heun",
+    )
+    cond = torch.randn(2, 4, 65)
+    x_t = torch.randn(2, 3, 65)
+    out = sampler.sample(cond, pred_len=3, frame_dim=65, num_inference_steps=4, x_T=x_t)
+    assert out.shape == (2, 3, 65)
 
 
 def test_auxiliary_losses_use_fps_and_stats() -> None:
@@ -133,6 +258,7 @@ def test_auxiliary_losses_use_fps_and_stats() -> None:
     cond = torch.zeros(1, 2, 65)
     cond[0, -1, 0] = 1.0
     cond[0, -1, 29] = 2.0
+    cond[0, -1, 58] = 1.0
     x0[:, 0, 0] = 2.0
     x0[:, 0, 29] = 2.0
     assert float(diffusion.continuity_loss(x0, cond)) == 0.0
@@ -163,12 +289,101 @@ def test_continuity_loss_penalizes_velocity_seam() -> None:
     assert float(diffusion.continuity_loss(x0, cond)) > 0.0
 
 
+def test_joint_x0_and_acceleration_losses() -> None:
+    diffusion = DiffusionSchedulerWrapper(ZeroDenoiser(), num_train_timesteps=8, beta_schedule="linear", fps=2.0)
+    diffusion.set_normalization_stats(torch.zeros(65), torch.ones(65))
+
+    target = torch.zeros(1, 4, 65)
+    pred = target.clone()
+    target[0, :, 0] = torch.tensor([0.0, 1.0, 3.0, 6.0])
+    pred.copy_(target)
+    assert float(diffusion.joint_x0_loss(pred, target)) == 0.0
+    assert float(diffusion.acceleration_loss(pred, target)) == 0.0
+
+    pred[0, 2, 0] += 1.0
+    assert float(diffusion.joint_x0_loss(pred, target)) > 0.0
+    assert float(diffusion.acceleration_loss(pred, target)) > 0.0
+
+
 def test_ddim_sampler_output_shape() -> None:
     sampler = DiffusionSchedulerWrapper(ZeroDenoiser(), num_train_timesteps=8, beta_schedule="linear")
     cond = torch.randn(2, 4, 65)
     x_t = torch.randn(2, 3, 65)
     out = sampler.sample(cond, pred_len=3, frame_dim=65, num_inference_steps=4, x_T=x_t)
     assert out.shape == (2, 3, 65)
+
+
+def test_prefix_transformer_denoiser_output_shape() -> None:
+    model = ConditionalDenoiser(
+        frame_dim=65,
+        history_len=4,
+        pred_len=3,
+        model_dim=32,
+        num_layers=1,
+        num_heads=4,
+        dropout=0.0,
+        condition_encoder="conv",
+        architecture="transformer",
+        use_time_token=True,
+        use_segment_embedding=True,
+    )
+    x_full = torch.randn(2, 7, 65)  # [B, H+K, 65]
+    timesteps = torch.tensor([0, 7], dtype=torch.long)
+    out = model(x_full, None, timesteps, conditioning_mode="prefix", prefix_len=4)
+    assert out.shape == (2, 3, 65)
+
+
+def test_prefix_ddim_sampler_output_shape() -> None:
+    model = ConditionalDenoiser(
+        frame_dim=65,
+        history_len=4,
+        pred_len=3,
+        model_dim=32,
+        num_layers=1,
+        num_heads=4,
+        dropout=0.0,
+        condition_encoder="conv",
+        architecture="transformer",
+        use_time_token=True,
+        use_segment_embedding=True,
+    )
+    sampler = DiffusionSchedulerWrapper(
+        model, num_train_timesteps=8, beta_schedule="linear", conditioning_mode="prefix"
+    )
+    cond = torch.randn(2, 4, 65)
+    x_t = torch.randn(2, 3, 65)
+    out = sampler.sample(cond, pred_len=3, frame_dim=65, num_inference_steps=4, x_T=x_t)
+    assert out.shape == (2, 3, 65)
+
+
+def test_prefix_training_loss_uses_future_suffix_only(tmp_path: Path) -> None:
+    cfg = {
+        "data": {"frame_dim": 65, "history_len": 4, "pred_len": 3},
+        "diffusion": {"num_inference_steps": 4},
+        "training": {
+            "device": "cpu",
+            "lr": 1e-3,
+            "weight_decay": 0.0,
+            "epochs": 1,
+            "grad_clip": 1.0,
+            "checkpoint_dir": str(tmp_path),
+            "velocity_loss_weight": 0.0,
+            "quaternion_loss_weight": 0.0,
+            "continuity_loss_weight": 0.0,
+            "use_wandb": False,
+            "resume": False,
+        },
+    }
+    model = PrefixFutureZeroDenoiser()
+    diffusion = DiffusionSchedulerWrapper(
+        model, num_train_timesteps=8, beta_schedule="linear", conditioning_mode="prefix"
+    )
+    trainer = Trainer(diffusion, DataLoader([]), None, cfg)
+    cond = torch.randn(2, 4, 65)
+    target = torch.randn(2, 3, 65)
+    losses = trainer._compute_losses(cond, target)
+    assert losses["noise_loss"].ndim == 0
+    assert model.last_shape == (2, 7, 65)
 
 
 def test_ddim_sampler_output_shape_with_unet() -> None:

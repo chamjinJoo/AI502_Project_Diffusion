@@ -57,24 +57,68 @@ class TransformerDenoiser(nn.Module):
         self.backbone = nn.TransformerEncoder(layer, num_layers=num_layers)
         self.output = nn.Sequential(nn.LayerNorm(model_dim), nn.Linear(model_dim, frame_dim))
 
-    def forward(self, xt: torch.Tensor, cond: torch.Tensor, timesteps: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        xt: torch.Tensor,
+        cond: torch.Tensor | None,
+        timesteps: torch.Tensor,
+        *,
+        conditioning_mode: str = "history",
+        prefix_len: int | None = None,
+    ) -> torch.Tensor:
         """Predict eps_hat.
 
         Args:
-            xt: Noisy future chunk with shape [B, K, 65].
-            cond: Motion history with shape [B, H, 65].
+            xt: History mode: noisy future [B, K, 65]. Prefix mode: clean
+                prefix plus noisy future [B, H+K, 65].
+            cond: History [B, H, 65] in history mode. Unused in prefix mode.
             timesteps: Diffusion steps with shape [B].
+            conditioning_mode: "history" or "prefix".
+            prefix_len: Number of clean prefix tokens in prefix mode.
 
         Returns:
-            Predicted noise with shape [B, K, 65].
+            Predicted future noise with shape [B, K, 65].
         """
+        D = self.model_dim
+        time_emb = self.time_embed(timesteps)[:, None, :]  # [B, 1, D]
+
+        if conditioning_mode == "prefix":
+            prefix_len = self.history_len if prefix_len is None else int(prefix_len)
+            _, sequence_len, _ = xt.shape
+            if prefix_len <= 0 or prefix_len >= sequence_len:
+                raise ValueError(f"prefix_len must be in (0, sequence_len), got {prefix_len} for {sequence_len}")
+            tokens = self.target_proj(xt)  # [B, H+K, D]
+            token_offset = 1 if self.use_time_token else 0
+            tokens = tokens + sinusoidal_positional_encoding(sequence_len, D, xt.device, xt.dtype, offset=token_offset)
+
+            if self.segment_embed is not None:
+                # Segment ids: 0=timestep, 1=clean prefix, 2=noisy future.
+                tokens[:, :prefix_len] = tokens[:, :prefix_len] + self.segment_embed.weight[1].view(1, 1, D)
+                tokens[:, prefix_len:] = tokens[:, prefix_len:] + self.segment_embed.weight[2].view(1, 1, D)
+
+            if self.use_time_token:
+                time_token = time_emb + sinusoidal_positional_encoding(1, D, xt.device, xt.dtype, offset=0)
+                if self.segment_embed is not None:
+                    time_token = time_token + self.segment_embed.weight[0].view(1, 1, D)
+                x = torch.cat([time_token, tokens], dim=1)  # [B, 1+H+K, D]
+                future_start = 1 + prefix_len
+            else:
+                x = tokens + time_emb  # [B, H+K, D]
+                future_start = prefix_len
+
+            x = self.backbone(x)  # [B, sequence, D]
+            return self.output(x[:, future_start:])  # [B, K, 65]
+
+        if conditioning_mode != "history":
+            raise ValueError("conditioning_mode must be 'history' or 'prefix'")
+        if cond is None:
+            raise ValueError("cond is required in history conditioning mode")
+
         _, K, _ = xt.shape
         H = self.history_len
-        D = self.model_dim
 
         cond_tokens = self.condition_encoder(cond)  # [B, H, D]
         target_tokens = self.target_proj(xt)  # [B, K, D]
-        time_emb = self.time_embed(timesteps)[:, None, :]  # [B, 1, D]
 
         if self.use_time_token:
             # MDM-style sequence: [diffusion timestep token, history tokens, target tokens].
@@ -168,7 +212,15 @@ class UnetDenoiser(nn.Module):
             cond_predict_scale=cond_predict_scale,
         )
 
-    def forward(self, xt: torch.Tensor, cond: torch.Tensor, timesteps: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        xt: torch.Tensor,
+        cond: torch.Tensor | None,
+        timesteps: torch.Tensor,
+        *,
+        conditioning_mode: str = "history",
+        prefix_len: int | None = None,
+    ) -> torch.Tensor:
         """Predict eps_hat.
 
         Args:
@@ -179,6 +231,11 @@ class UnetDenoiser(nn.Module):
         Returns:
             Predicted noise with shape [B, K, 65].
         """
+        del prefix_len
+        if conditioning_mode != "history":
+            raise ValueError("prefix conditioning is currently implemented for the transformer denoiser only")
+        if cond is None:
+            raise ValueError("cond is required in history conditioning mode")
         cond_tokens = self.condition_encoder(cond)  # [B, H, D]
         if self.condition_summary_type == "mean":
             global_cond = self.cond_summary(cond_tokens.mean(dim=1))  # [B, D]
@@ -254,6 +311,14 @@ class ConditionalDenoiser(nn.Module):
         else:
             raise ValueError(f"unknown denoiser architecture: {architecture}")
 
-    def forward(self, xt: torch.Tensor, cond: torch.Tensor, timesteps: torch.Tensor) -> torch.Tensor:
-        """Predict eps_hat with shape [B, K, 65]."""
-        return self.net(xt, cond, timesteps)
+    def forward(
+        self,
+        xt: torch.Tensor,
+        cond: torch.Tensor | None,
+        timesteps: torch.Tensor,
+        *,
+        conditioning_mode: str = "history",
+        prefix_len: int | None = None,
+    ) -> torch.Tensor:
+        """Predict future eps_hat with shape [B, K, 65]."""
+        return self.net(xt, cond, timesteps, conditioning_mode=conditioning_mode, prefix_len=prefix_len)

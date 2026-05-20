@@ -54,6 +54,9 @@ def compute_window_stats(
     pred_len: int,
     frame_dim: int,
     root_relative: bool,
+    fps: float,
+    joint_vel_mode: str,
+    body_pos_mode: str,
     max_windows: int | None,
     seed: int,
     max_files: int | None = None,
@@ -64,7 +67,7 @@ def compute_window_stats(
     normalized tensors seen by training. The implementation streams selected
     files instead of keeping every sequence memmap open at once.
     """
-    from datasets.motion_chunk_dataset import make_root_relative
+    from datasets.motion_chunk_dataset import apply_model_space_transforms, make_root_relative
 
     rng = random.Random(seed)
     selected_paths = list(paths)
@@ -84,6 +87,7 @@ def compute_window_stats(
     start_time = time.time()
     print(
         f"[stats] streaming files={len(selected_paths)}/{len(paths)} root_relative={root_relative} "
+        f"joint_vel_mode={joint_vel_mode} body_pos_mode={body_pos_mode} "
         f"max_windows={target_windows} windows_per_file={windows_per_file}",
         flush=True,
     )
@@ -108,6 +112,13 @@ def compute_window_stats(
             target = np.asarray(sequence[t + 1 : t + 1 + pred_len], dtype=np.float32)  # [K, 65]
             if root_relative:
                 cond, target = make_root_relative(cond, target)
+            cond, target = apply_model_space_transforms(
+                cond,
+                target,
+                fps=fps,
+                joint_vel_mode=joint_vel_mode,
+                body_pos_mode=body_pos_mode,
+            )
             frames = np.concatenate([cond, target], axis=0).astype(np.float64)
             total_count += frames.shape[0]
             total_windows += 1
@@ -139,6 +150,9 @@ def compute_window_stats(
         {
             "stats_type": "sampled_window",
             "root_relative": bool(root_relative),
+            "fps": float(fps),
+            "joint_vel_mode": str(joint_vel_mode),
+            "body_pos_mode": str(body_pos_mode),
             "history_len": int(history_len),
             "pred_len": int(pred_len),
             "frame_dim": int(frame_dim),
@@ -164,6 +178,9 @@ def main() -> None:
     parser.add_argument("--history_len", type=int, default=20)
     parser.add_argument("--pred_len", type=int, default=10)
     parser.add_argument("--root_relative", action="store_true")
+    parser.add_argument("--fps", type=float, default=50.0)
+    parser.add_argument("--joint_vel_mode", type=str, default="source", choices=["source", "finite_difference"])
+    parser.add_argument("--body_pos_mode", type=str, default="relative", choices=["relative", "delta"])
     parser.add_argument("--max_windows", type=int, default=None, help="Optional random window subset for window stats")
     parser.add_argument("--max_files", type=int, default=None, help="Optional random file subset for window stats")
     parser.add_argument("--seed", type=int, default=42)
@@ -179,14 +196,18 @@ def main() -> None:
     if not paths:
         raise ValueError("No valid files found for stats computation")
 
-    if args.root_relative:
+    use_window_stats = args.root_relative or args.joint_vel_mode != "source" or args.body_pos_mode != "relative"
+    if use_window_stats:
         compute_window_stats(
             paths=paths,
             output=args.output,
             history_len=args.history_len,
             pred_len=args.pred_len,
             frame_dim=args.frame_dim,
-            root_relative=True,
+            root_relative=args.root_relative,
+            fps=args.fps,
+            joint_vel_mode=args.joint_vel_mode,
+            body_pos_mode=args.body_pos_mode,
             max_windows=args.max_windows,
             seed=args.seed,
             max_files=args.max_files,

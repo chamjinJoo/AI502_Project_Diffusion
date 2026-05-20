@@ -12,7 +12,7 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
-from datasets.motion_chunk_dataset import load_stats, make_root_relative
+from datasets.motion_chunk_dataset import apply_model_space_transforms, decode_future_model_space, load_stats, make_root_relative
 from diffusion.scheduler_wrapper import DiffusionSchedulerWrapper
 from models.denoiser import ConditionalDenoiser
 
@@ -38,6 +38,10 @@ def main() -> None:
     cfg = ckpt["config"]
     data_cfg = cfg["data"]
     model_cfg = cfg["model"]
+    conditioning_mode = str(model_cfg.get("conditioning_mode", cfg.get("conditioning_mode", "history")))
+    architecture = str(model_cfg.get("architecture", "transformer"))
+    if conditioning_mode == "prefix" and architecture != "transformer":
+        raise ValueError("conditioning_mode='prefix' is currently supported only with model.architecture='transformer'")
     device = torch.device("cuda" if cfg["training"].get("device", "cuda") == "cuda" and torch.cuda.is_available() else "cpu")
 
     model = ConditionalDenoiser(
@@ -49,7 +53,7 @@ def main() -> None:
         num_heads=int(model_cfg["num_heads"]),
         dropout=float(model_cfg["dropout"]),
         condition_encoder=str(model_cfg["condition_encoder"]),
-        architecture=str(model_cfg.get("architecture", "transformer")),
+        architecture=architecture,
         down_dims=tuple(int(dim) for dim in model_cfg.get("down_dims", [256, 512, 1024])),
         kernel_size=int(model_cfg.get("kernel_size", 3)),
         n_groups=int(model_cfg.get("n_groups", 8)),
@@ -68,6 +72,14 @@ def main() -> None:
     cond_np = cond_np[-int(data_cfg["history_len"]) :]  # [H, 65]
     if bool(data_cfg.get("root_relative", False)):
         cond_np, _ = make_root_relative(cond_np, np.empty((0, int(data_cfg["frame_dim"])), dtype=np.float32))
+    cond_reference_np = cond_np.copy()  # [H, 65], denormalized reference-space condition
+    cond_np, _ = apply_model_space_transforms(
+        cond_np,
+        np.empty((0, int(data_cfg["frame_dim"])), dtype=np.float32),
+        fps=float(data_cfg.get("fps", 50.0)),
+        joint_vel_mode=str(data_cfg.get("joint_vel_mode", "source")),
+        body_pos_mode=str(data_cfg.get("body_pos_mode", "relative")),
+    )
     mean, std = load_stats(data_cfg["stats_path"])
     cond_np = (cond_np - mean) / std
     cond = torch.from_numpy(cond_np[None]).to(device)  # [1, H, 65]
@@ -86,6 +98,11 @@ def main() -> None:
         beta_schedule=str(diffusion_cfg["beta_schedule"]),
         prediction_type=str(diffusion_cfg["prediction_type"]),
         clip_sample=bool(diffusion_cfg["clip_sample"]),
+        conditioning_mode=conditioning_mode,
+        objective=str(diffusion_cfg.get("objective", "epsilon")),
+        flow_solver=str(diffusion_cfg.get("flow_solver", "euler")),
+        joint_vel_mode=str(data_cfg.get("joint_vel_mode", "source")),
+        body_pos_mode=str(data_cfg.get("body_pos_mode", "relative")),
     ).to(device)
     with torch.no_grad():
         pred = sampler.sample(
@@ -99,10 +116,17 @@ def main() -> None:
     pred_np = pred.squeeze(0).cpu().numpy()  # [K, 65]
     if args.denormalize:
         pred_np = pred_np * std + mean
+        pred_np = decode_future_model_space(
+            pred_np,
+            fps=float(data_cfg.get("fps", 50.0)),
+            joint_vel_mode=str(data_cfg.get("joint_vel_mode", "source")),
+            body_pos_mode=str(data_cfg.get("body_pos_mode", "relative")),
+            prev_joint_pos=cond_reference_np[-1, :29],
+        )
     if args.normalize_quat:
         quat = pred_np[:, 58:62]
         pred_np[:, 58:62] = quat / np.clip(np.linalg.norm(quat, axis=-1, keepdims=True), 1e-8, None)
-    if args.reconstruct_velocity:
+    if args.reconstruct_velocity and str(data_cfg.get("joint_vel_mode", "source")) != "finite_difference":
         fps = float(args.fps if args.fps is not None else data_cfg.get("fps", 50.0))
         joint_pos = pred_np[:, :29]
         joint_vel = np.zeros_like(joint_pos)
