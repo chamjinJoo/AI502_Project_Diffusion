@@ -181,10 +181,8 @@ The diffusion process uses Hugging Face **diffusers**:
 
 - `diffusers.DDIMScheduler`: https://huggingface.co/docs/diffusers/api/schedulers/ddim
 
-The current default follows the job 103 setting: an MDM-inspired Transformer
-denoiser trained with a rectified-flow objective in the same fixed 65D
-tracking-reference space. Older DDIM epsilon-prediction code paths are still
-kept for experiments, but the default config is rectified-flow based.
+The current default is an MDM-inspired Transformer denoiser trained with a
+rectified-flow objective in the same fixed 65D tracking-reference space.
 
 The denoiser still predicts a future chunk-shaped tensor from noisy future
 tokens and motion history:
@@ -195,7 +193,6 @@ loss  = MSE(v_hat, x1 - x0)
 ```
 
 During inference, the default rectified-flow sampler uses Euler integration.
-The DDIM scheduler wrapper remains available for epsilon-prediction checkpoints.
 
 The denoiser interface is fixed as:
 
@@ -218,7 +215,7 @@ The denoiser uses:
 - joint self-attention over `[timestep token, history tokens, noisy target tokens]`
 - segment embeddings that distinguish timestep, history, and target tokens
 
-The default training config is the job 103 MDM-style Transformer setup:
+The default training config is the recommended MDM-style Transformer setup:
 
 ```yaml
 model:
@@ -256,28 +253,18 @@ Recommended checkpoint:
 checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt
 ```
 
-This is the job 103 `pred_len=10` root-relative rectified-flow MDM-style
-Transformer checkpoint. It uses the MDM-inspired timestep token and segment
-embeddings, and expects `processed_dataset/stats/stats.json` for normalization.
+This is the recommended `pred_len=10` root-relative rectified-flow MDM-style
+Transformer checkpoint. It expects `processed_dataset/stats/stats.json` for
+normalization.
 
-Example generated chunks are included under:
+Example GIF visualizations are included under:
 
 ```text
 samples/pred_len10/rectified_flow_mdm_root_relative/
 ```
 
 The sample directory intentionally contains GIF visualizations only, so it stays
-small enough for git. These visualizations were generated from the recommended
-job 103 checkpoint.
-
-### Diffusion Policy Style ConditionalUnet1D
-
-The repository also contains a Diffusion Policy style U-Net in [models/conditional_unet1d.py](models/conditional_unet1d.py), adapted from the public `ConditionalUnet1D` design:
-
-- Diffusion Policy repository: https://github.com/real-stanford/diffusion_policy
-- Diffusion Policy paper: https://arxiv.org/abs/2303.04137
-
-This code path is retained for experiments and has been updated toward Diffusion Policy style global/local conditioning. It is not the current default. In our BONES-SEED locomotion setting, the MDM-style Transformer remains the stronger candidate so far.
+small enough for git.
 
 ## Requirements
 
