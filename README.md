@@ -280,8 +280,8 @@ Example GIF visualizations are included under:
 samples/pred_len10/rectified_flow_mdm_root_relative/
 ```
 
-The sample directory intentionally contains GIF visualizations only, so it stays
-small enough for git.
+The sample directory intentionally contains GIF visualizations only, named after
+the source motion clips, so it stays small enough for git.
 
 ## Requirements
 
