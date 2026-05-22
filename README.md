@@ -133,10 +133,25 @@ Inspect source schemas:
 python data_prep/inspect_sources.py --config configs/dataset_build.yaml
 ```
 
-Build 10 Hz processed `[T, 65]` sequences, train/val manifests, stats, and reports:
+Build 10 Hz processed `[T, 65]` sequences, train/val manifests, initial stats, and reports:
 
 ```bash
 python data_prep/build_dataset.py --config configs/dataset_build.yaml
+```
+
+Then compute the root-relative sampled-window stats used by the default model:
+
+```bash
+python scripts/compute_stats.py \
+  --file_list processed_dataset/manifests/train_manifest.jsonl \
+  --output processed_dataset/stats/stats.json \
+  --history_len 20 \
+  --pred_len 10 \
+  --frame_dim 65 \
+  --root_relative \
+  --fps 10 \
+  --joint_vel_mode source \
+  --body_pos_mode relative
 ```
 
 Force rebuild after changing FPS/unit assumptions:
@@ -161,7 +176,7 @@ processed_dataset/manifests/val_manifest.jsonl
 processed_dataset/stats/stats.json
 ```
 
-`processed_dataset/stats/stats.json` stores the 10 Hz root-relative normalization stats used by the current default config. It is not a summary of model-generated outputs; the checkpoint expects this file for condition normalization and denormalizing generated chunks.
+`processed_dataset/stats/stats.json` stores the 10 Hz **sampled-window root-relative** normalization stats used by the current default config. It is computed after slicing training windows and applying the same `data.root_relative: true` transform that `MotionChunkDataset` applies before normalization. It is not a summary of model-generated outputs; the checkpoint expects this file for condition normalization and denormalizing generated chunks.
 
 ## Root-Relative Pose Convention
 
@@ -256,8 +271,8 @@ checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt
 ```
 
 This is the recommended 10 Hz `pred_len=10` root-relative rectified-flow MDM-style
-Transformer checkpoint. It expects `processed_dataset/stats/stats.json` for
-normalization.
+Transformer checkpoint. It is trained with sampled-window root-relative stats and
+expects `processed_dataset/stats/stats.json` for normalization.
 
 Example GIF visualizations are included under:
 
@@ -292,7 +307,7 @@ python scripts/train.py --config configs/default.yaml
 `training.checkpoint_dir` may contain date tokens that are expanded at train launch time:
 
 ```yaml
-checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_pred_len10_fps10_{date}
+checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_pred_len10_fps10_windowstats_{date}
 ```
 
 Supported tokens are `{date}` -> `YYYYMMDD` and `{datetime}` -> `YYYYMMDD_HHMMSS`.

@@ -3,13 +3,10 @@ seed: 42
 data:
   train_paths: []
   val_paths: []
-
   train_file_list: processed_dataset/manifests/train_manifest.jsonl
   val_file_list: processed_dataset/manifests/val_manifest.jsonl
-
-  train_data_dir:
-  val_data_dir:
-
+  train_data_dir: null
+  val_data_dir: null
   stats_path: processed_dataset/stats/stats.json
   val_split: 0.0
   frame_dim: 65
@@ -41,7 +38,7 @@ training:
   sample_eval_batches: 1
   sample_eval_num_inference_steps: 10
   sample_eval_weight: 0.02
-  checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_pred_len10_fps10_{date}
+  checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_pred_len10_fps10_windowstats_{date}
   resume: false
   use_wandb: false
   device: cuda
@@ -64,7 +61,10 @@ model:
   dropout: 0.1
   condition_encoder: transformer
   condition_summary: flatten
-  down_dims: [256, 512, 1024]
+  down_dims:
+    - 256
+    - 512
+    - 1024
   kernel_size: 3
   n_groups: 8
   cond_predict_scale: false
