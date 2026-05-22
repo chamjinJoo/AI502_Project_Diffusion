@@ -1,10 +1,10 @@
 # Conditional Humanoid Motion Planner
 
-Minimal PyTorch research code for a history-conditioned diffusion/flow planner that predicts future humanoid tracking references directly in GR00T/IsaacLab-compatible motion space.
+Minimal PyTorch research code for a history-conditioned motion planner that predicts future humanoid tracking references directly in GR00T/IsaacLab-compatible motion space. This is not a text-to-motion model.
 
 ## Representation
 
-Every motion frame is a fixed 65-dimensional vector:
+Every frame is a fixed 65-dimensional vector:
 
 ```text
 [ joint_pos(29), joint_vel(29), body_quat(4), body_pos(3) ]
@@ -13,35 +13,20 @@ Every motion frame is a fixed 65-dimensional vector:
 - `joint_pos`: 29 Unitree G1 / IsaacLab-order joint positions
 - `joint_vel`: 29 matching joint velocities
 - `body_quat`: root orientation quaternion in `(w, x, y, z)`
-- `body_pos`: root position `(x, y, z)`
+- `body_pos`: root position channels
 
-Each processed training sequence is saved as:
-
-```text
-[T, 65]
-```
-
-For history length `H=20` and prediction horizon `K=10`, a training sample is:
+For the current default model, processed sequences are sampled at **10 Hz**. With `H=20` and `K=10`, the model conditions on 2 seconds of history and predicts a 1-second future reference chunk:
 
 ```text
 cond   = sequence[t-H+1 : t+1]   # [20, 65]
 target = sequence[t+1   : t+1+K] # [10, 65]
 ```
 
-The default planner runs at **10 Hz**: `H=20` covers 2 seconds of history and `K=10` predicts a 1-second future goal chunk.
-
-At inference time the diffusion planner takes:
-
-```text
-cond  # previous motion history, [H, 65]
-x_T   # initial future noise, [K, 65] or [B, K, 65]
-```
-
-`x_T` is sampled from standard Gaussian noise by default. It can also be supplied with `--x_T`, which is the intended hook for future steering-policy integration.
+At inference time the planner takes `cond [H, 65]` plus initial future noise `x_T [K, 65]` or `[B, K, 65]`. If `x_T` is omitted, it is sampled from a standard Gaussian. Supplying `x_T` is the hook for future steering-policy integration.
 
 ## Dataset Source
 
-The current preprocessing pipeline targets **BONES-SEED**, specifically the **Unitree G1 MuJoCo-compatible CSV trajectories**.
+The preprocessing pipeline targets **BONES-SEED**, specifically the **Unitree G1 MuJoCo-compatible CSV trajectories**. The default build filters to locomotion-style clips.
 
 Primary sources:
 
@@ -49,28 +34,12 @@ Primary sources:
 - BONES-SEED dataset page: https://bones.studio/datasets/seed
 - BONES-SEED license page: https://bones.studio/info/seed-license
 
-The source dataset provides Unitree G1-compatible motion CSV paths such as `move_g1_mujoco_path`. This project does not use the source files directly during training. Instead, it converts valid source clips into internal `.npy` arrays under:
-
-```text
-processed_dataset/
-  sequences/*.npy
-  manifests/*.jsonl
-  stats/
-  reports/
-```
-
-The converter inspects actual CSV columns and maps them into the fixed 65D representation:
-
-```text
-29 joint DOF columns -> joint_pos
-missing joint_vel    -> finite-difference joint_pos when allowed
-root Euler rotation  -> body_quat(w, x, y, z)
-root translation     -> body_pos
-```
+The source CSV files are converted into internal `.npy` arrays with shape `[T, 65]`. Source root pose is kept canonical/global in the processed sequence files; root-relative and delta-space transforms are applied when training windows are sampled.
 
 Current preprocessing assumptions are in [configs/dataset_build.yaml](configs/dataset_build.yaml):
 
 ```yaml
+output_root: processed_dataset_10hz
 target_fps: 10
 assume_fps_if_missing: 120
 source_joint_unit: degrees
@@ -82,39 +51,29 @@ allow_body_pos_zero_fallback: false
 allow_body_quat_identity_debug_fallback: false
 ```
 
-Important: root position and root orientation are not silently fabricated. Clips missing required root fields are skipped. Joint velocity may be reconstructed from finite differences because many source CSVs provide joint position but not velocity.
+Root position and root orientation are not silently fabricated. Clips missing required root fields are skipped. Joint velocity may be reconstructed from finite differences because many source CSVs provide joint position but not velocity.
 
 ## Data Files
 
-Raw and processed motion data are not committed to git because they are large generated or downloaded artifacts. The repository `.gitignore` excludes:
-
-```text
-data/
-processed_dataset/*  # except processed_dataset/stats/stats.json
-exports/
-```
-
-The repository includes one curated root-relative checkpoint, a few example
-future-reference samples, and the normalization stats needed for sampling:
+Raw and processed motion data are mostly excluded from git because they are large downloaded/generated artifacts. The repository includes only the small files needed to run the curated model:
 
 ```text
 checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt
-samples/pred_len10/rectified_flow_mdm_root_relative/
-processed_dataset/stats/stats.json
+samples/pred_len10/rectified_flow_mdm_root_relative/*.gif
+processed_dataset_10hz/stats/root_relative_delta_window_stats.json
 ```
 
-Full training runs, intermediate checkpoints, raw motion data, processed motion
-sequences, and manifests should stay local.
+The checkpoint also embeds its normalization stats, so recent sampling and evaluation scripts can usually load stats directly from the checkpoint. The stats JSON is included for compatibility and inspection.
 
-On a new machine, download BONES-SEED separately, place the Unitree G1 MuJoCo-compatible CSV data under the path configured in [configs/dataset_build.yaml](configs/dataset_build.yaml), then run the preprocessing pipeline.
+## Dataset Build
 
-The default expected source path is:
+Place BONES-SEED Unitree G1 MuJoCo-compatible CSV data under:
 
 ```text
 data/raw/bones_seed_g1
 ```
 
-You may either download from the BONES-SEED Hugging Face dataset page or from the Bones Studio dataset page. If using the Hugging Face CLI, the workflow is:
+One possible download route is the Hugging Face CLI:
 
 ```bash
 mkdir -p data/raw
@@ -123,9 +82,7 @@ huggingface-cli download bones-studio/seed \
   --local-dir data/raw/bones_seed_g1
 ```
 
-If the downloaded archive or directory layout differs, keep only the relevant BONES-SEED / Unitree G1 MuJoCo CSV tree under `data/raw/bones_seed_g1`, or update `source_roots` in [configs/dataset_build.yaml](configs/dataset_build.yaml).
-
-## Dataset Build
+If the downloaded layout differs, keep the relevant BONES-SEED / Unitree G1 MuJoCo CSV tree under `data/raw/bones_seed_g1`, or edit `source_roots` in [configs/dataset_build.yaml](configs/dataset_build.yaml).
 
 Inspect source schemas:
 
@@ -133,33 +90,25 @@ Inspect source schemas:
 python data_prep/inspect_sources.py --config configs/dataset_build.yaml
 ```
 
-Build 10 Hz processed `[T, 65]` sequences, train/val manifests, initial stats, and reports:
+Build 10 Hz processed sequences, manifests, initial raw stats, and reports:
 
 ```bash
 python data_prep/build_dataset.py --config configs/dataset_build.yaml
 ```
 
-Then compute the root-relative sampled-window stats used by the default model:
+Compute the sampled-window stats used by the default model:
 
 ```bash
 python scripts/compute_stats.py \
-  --file_list processed_dataset/manifests/train_manifest.jsonl \
-  --output processed_dataset/stats/stats.json \
+  --file_list processed_dataset_10hz/manifests/train_manifest.jsonl \
+  --output processed_dataset_10hz/stats/root_relative_delta_window_stats.json \
   --history_len 20 \
   --pred_len 10 \
   --frame_dim 65 \
   --root_relative \
   --fps 10 \
   --joint_vel_mode source \
-  --body_pos_mode relative
-```
-
-Force rebuild after changing FPS/unit assumptions:
-
-```bash
-python data_prep/build_dataset.py \
-  --config configs/dataset_build.yaml \
-  --force_rebuild
+  --body_pos_mode delta
 ```
 
 Run sanity checks:
@@ -171,16 +120,16 @@ python data_prep/sanity_check.py --config configs/dataset_build.yaml
 Training uses:
 
 ```text
-processed_dataset/manifests/train_manifest.jsonl
-processed_dataset/manifests/val_manifest.jsonl
-processed_dataset/stats/stats.json
+processed_dataset_10hz/manifests/train_manifest.jsonl
+processed_dataset_10hz/manifests/val_manifest.jsonl
+processed_dataset_10hz/stats/root_relative_delta_window_stats.json
 ```
 
-`processed_dataset/stats/stats.json` stores the 10 Hz **sampled-window root-relative** normalization stats used by the current default config. It is computed after slicing training windows and applying the same `data.root_relative: true` transform that `MotionChunkDataset` applies before normalization. It is not a summary of model-generated outputs; the checkpoint expects this file for condition normalization and denormalizing generated chunks.
+`root_relative_delta_window_stats.json` stores normalization stats computed in the actual training space: sampled windows after root-relative conversion and `body_pos_mode: delta`. It is not a summary of model-generated outputs. It is used to normalize condition/target chunks and denormalize generated chunks.
 
-## Root-Relative Pose Convention
+## Root-Relative And Delta Pose Convention
 
-Raw `processed_dataset/sequences/*.npy` files remain in the source/global root-pose coordinate system. For training, `data.root_relative: true` converts each sampled window dynamically inside `MotionChunkDataset` before normalization:
+The raw processed `.npy` sequences remain source/global root-pose trajectories. During dataset sampling, `data.root_relative: true` anchors each window at the last history frame:
 
 ```text
 anchor = cond[-1]
@@ -188,71 +137,46 @@ body_pos_rel[i]  = R_anchor^-1 * (body_pos[i] - body_pos_anchor)
 body_quat_rel[i] = inverse(body_quat_anchor) * body_quat[i]
 ```
 
-The last history frame becomes approximately identity pose: `body_pos=[0,0,0]`, `body_quat=[1,0,0,0]`.
+The default model then uses `data.body_pos_mode: delta`, so body position channels are represented as per-frame displacement rather than absolute global XY. This keeps locomotion references better centered for 10 Hz tracking-goal generation.
 
-During inference, `scripts/sample.py` applies the same condition-history conversion when the checkpoint config contains `data.root_relative: true`. Generated future chunks from such checkpoints are current-frame-relative references.
+During inference, `scripts/sample.py` applies the same condition-history conversion when the checkpoint config contains these data settings. Generated future chunks from the recommended checkpoint are current-frame-relative, delta-style future references.
 
-## Diffusion Model Source
+## Model
 
-The diffusion process uses Hugging Face **diffusers**:
+The current default is an MDM-inspired Transformer denoiser trained with a rectified-flow objective. It keeps the direct 65D tracking-reference output and does not use text, SMPL, or robotics middleware.
 
-- `diffusers.DDIMScheduler`: https://huggingface.co/docs/diffusers/api/schedulers/ddim
-
-The current default is an MDM-inspired Transformer denoiser trained with a
-rectified-flow objective in the same fixed 65D tracking-reference space.
-
-The denoiser still predicts a future chunk-shaped tensor from noisy future
-tokens and motion history:
+The denoiser interface is:
 
 ```text
-v_hat = model(x_t, timestep, cond)
-loss  = MSE(v_hat, x1 - x0)
+model(xt [B, K, 65], timestep [B], cond [B, H, 65]) -> v_hat [B, K, 65]
 ```
-
-During inference, the default rectified-flow sampler uses Euler integration.
-
-The denoiser interface is fixed as:
-
-```text
-model(xt [B, K, 65], cond [B, H, 65], timestep [B]) -> v_hat [B, K, 65]
-```
-
-The current recommended denoiser is the MDM-inspired Transformer implementation in [models/denoiser.py](models/denoiser.py). It keeps this project's direct 65D tracking-reference output while borrowing two simple sequence-design ideas from Motion Diffusion Model (MDM): a dedicated diffusion timestep token and explicit token-role separation.
 
 References:
 
 - Motion Diffusion Model repository: https://github.com/GuyTevet/motion-diffusion-model
 - Motion Diffusion Model paper: https://arxiv.org/abs/2209.14916
+- Hugging Face DDIMScheduler docs: https://huggingface.co/docs/diffusers/api/schedulers/ddim
 
-The denoiser uses:
+The model uses target-token projection, sinusoidal positional encodings, a Transformer condition encoder over motion history, joint attention over `[timestep token, history tokens, noisy target tokens]`, and segment embeddings for token roles.
 
-- target-token projection for noisy future chunks
-- sinusoidal positional encodings over history and target tokens
-- Transformer condition encoder over previous motion history
-- joint self-attention over `[timestep token, history tokens, noisy target tokens]`
-- segment embeddings that distinguish timestep, history, and target tokens
-
-The default training config is the recommended 10 Hz MDM-style Transformer setup:
+The default config is [configs/default.yaml](configs/default.yaml):
 
 ```yaml
+data:
+  fps: 10
+  root_relative: true
+  joint_vel_mode: source
+  body_pos_mode: delta
+  history_len: 20
+  pred_len: 10
+
 model:
   architecture: transformer
   dim: 256
   num_layers: 4
   num_heads: 4
-
-data:
-  history_len: 20
-  pred_len: 10
-  fps: 10
-
-training:
-  velocity_loss_weight: 0.05
-  quaternion_loss_weight: 0.001
-  continuity_loss_weight: 0.1
-  joint_x0_loss_weight: 0.02
-  acceleration_loss_weight: 0.02
-  auxiliary_max_timestep: 500
+  condition_encoder: transformer
+  condition_summary: flatten
 
 diffusion:
   objective: rectified_flow
@@ -260,9 +184,9 @@ diffusion:
   num_inference_steps: 30
 ```
 
-The main objective is rectified-flow regression. Auxiliary terms encourage
-velocity consistency, unit quaternions, smoothness, and continuity from the last
-history frame.
+Auxiliary losses encourage velocity consistency, unit quaternions, smoothness, and continuity from the last history frame.
+
+## Recommended Checkpoint And Samples
 
 Recommended checkpoint:
 
@@ -270,18 +194,13 @@ Recommended checkpoint:
 checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt
 ```
 
-This is the recommended 10 Hz `pred_len=10` root-relative rectified-flow MDM-style
-Transformer checkpoint. It is trained with sampled-window root-relative stats and
-expects `processed_dataset/stats/stats.json` for normalization.
-
-Example GIF visualizations are included under:
+This file currently contains the job 860 model: a 10 Hz `pred_len=10` root-relative/delta rectified-flow MDM-style Transformer checkpoint. Example GIF visualizations are included under:
 
 ```text
-samples/pred_len10/rectified_flow_mdm_root_relative/
+samples/pred_len10/rectified_flow_mdm_root_relative/*.gif
 ```
 
-The sample directory intentionally contains GIF visualizations only, named after
-the source motion clips, so it stays small enough for git.
+The sample directory intentionally contains GIF files only, so it stays small enough for git.
 
 ## Requirements
 
@@ -298,21 +217,21 @@ Install an equivalent Python environment with PyTorch, NumPy, PyYAML, and Huggin
 
 ## Train
 
-Train the default 10 Hz MDM-style Transformer configuration:
+Train the default 10 Hz configuration:
 
 ```bash
 python scripts/train.py --config configs/default.yaml
 ```
 
-`training.checkpoint_dir` may contain date tokens that are expanded at train launch time:
+`training.checkpoint_dir` may contain date tokens expanded at train launch time:
 
 ```yaml
-checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_pred_len10_fps10_windowstats_{date}
+checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_delta_pred_len10_fps10_windowstats_{date}
 ```
 
 Supported tokens are `{date}` -> `YYYYMMDD` and `{datetime}` -> `YYYYMMDD_HHMMSS`.
 
-The training script checks processed manifest metadata before training. If `assume_fps_if_missing`, `data.fps`, or the processed dataset changes, rebuild the dataset or refresh any external dataset cache before training.
+The training script checks processed manifest and stats metadata before training. If FPS, root-relative mode, body-position mode, or dataset assumptions change, rebuild the dataset and recompute training-window stats before training.
 
 ## Sample
 
@@ -341,39 +260,26 @@ python scripts/sample.py \
   --output samples/predicted_chunk.npy
 ```
 
-`--normalize_quat` normalizes the generated `body_quat` channels after sampling.
-By default, use the model-predicted `joint_vel` channels. `--reconstruct_velocity
---fps 10` can replace them with finite differences of predicted joint positions,
-but this may amplify noise if the generated joint positions are not smooth.
-
-Included GIF visualizations from the recommended root-relative checkpoint:
-
-```text
-samples/pred_len10/rectified_flow_mdm_root_relative/*.gif
-```
+`--normalize_quat` normalizes generated `body_quat` channels after sampling. By default, use model-predicted `joint_vel`. `--reconstruct_velocity --fps 10` is only a diagnostic option and may amplify noise when predicted joint positions are not smooth.
 
 ## Export CSV
 
-Recommended path: export the model-predicted `joint_vel` channels directly.
-This preserves the 65D diffusion output as generated by the model.
-
-Export a predicted chunk into grouped CSV files:
+Export the model-predicted 65D future chunk into grouped CSV files:
 
 ```bash
 python scripts/export_reference.py \
   --chunk samples/predicted_chunk.npy \
-  --stats processed_dataset/stats/stats.json \
+  --stats processed_dataset_10hz/stats/root_relative_delta_window_stats.json \
   --output_dir exports/reference \
   --already_denormalized
 ```
 
-Optional diagnostic path: export velocity from finite differences instead of
-the model-predicted `joint_vel` channels:
+Optional diagnostic velocity reconstruction:
 
 ```bash
 python scripts/export_reference.py \
   --chunk samples/predicted_chunk.npy \
-  --stats processed_dataset/stats/stats.json \
+  --stats processed_dataset_10hz/stats/root_relative_delta_window_stats.json \
   --output_dir exports/reference \
   --already_denormalized \
   --reconstruct_velocity \
@@ -389,29 +295,29 @@ body_quat.csv
 body_pos.csv
 ```
 
-`body_quat.csv` uses header order:
+`body_quat.csv` uses header order `w, x, y, z`.
 
-```text
-w, x, y, z
+## Evaluate And Visualize
+
+Run a compact post-training check from a checkpoint:
+
+```bash
+python scripts/post_training_eval.py \
+  --checkpoint checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt \
+  --output_dir samples/post_training_eval \
+  --num_eval 256 \
+  --num_visual 18 \
+  --num_inference_steps 30
 ```
 
-## Evaluate
+This writes an evaluation summary, generated chunks, target chunks, and GIF visualizations under `samples/post_training_eval/`.
 
-Compare a predicted future chunk with a target future chunk:
+For a direct chunk-to-chunk metric comparison:
 
 ```bash
 python scripts/evaluate.py \
   --pred samples/predicted_chunk.npy \
   --target samples/target_chunk.npy
-```
-
-It reports:
-
-```text
-full_mse
-joint_pos_mse
-joint_vel_mse
-quaternion_norm_error
 ```
 
 ## Tests

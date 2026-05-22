@@ -3,18 +3,18 @@ seed: 42
 data:
   train_paths: []
   val_paths: []
-  train_file_list: processed_dataset/manifests/train_manifest.jsonl
-  val_file_list: processed_dataset/manifests/val_manifest.jsonl
+  train_file_list: processed_dataset_10hz/manifests/train_manifest.jsonl
+  val_file_list: processed_dataset_10hz/manifests/val_manifest.jsonl
   train_data_dir: null
   val_data_dir: null
-  stats_path: processed_dataset/stats/stats.json
+  stats_path: processed_dataset_10hz/stats/root_relative_delta_window_stats.json
   val_split: 0.0
   frame_dim: 65
   fps: 10
   source_fps_if_assumed: 120
   root_relative: true
   joint_vel_mode: source
-  body_pos_mode: relative
+  body_pos_mode: delta
   history_len: 20
   pred_len: 10
 
@@ -38,7 +38,7 @@ training:
   sample_eval_batches: 1
   sample_eval_num_inference_steps: 10
   sample_eval_weight: 0.02
-  checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_pred_len10_fps10_windowstats_{date}
+  checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_delta_pred_len10_fps10_windowstats_{date}
   resume: false
   use_wandb: false
   device: cuda

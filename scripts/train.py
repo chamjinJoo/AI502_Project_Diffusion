@@ -165,6 +165,57 @@ def attach_stats_hash(data_cfg: dict[str, Any]) -> None:
     print(f"[data] stats_path={path} sha256={digest}", flush=True)
 
 
+def validate_stats_metadata(data_cfg: dict[str, Any]) -> None:
+    """Fail early when stats do not match the dataset training space."""
+    stats_path = data_cfg.get("stats_path")
+    if not stats_path:
+        return
+    path = Path(stats_path)
+    if not path.exists():
+        raise FileNotFoundError(f"stats_path not found: {path}")
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    needs_window_stats = (
+        bool(data_cfg.get("root_relative", False))
+        or str(data_cfg.get("joint_vel_mode", "source")) != "source"
+        or str(data_cfg.get("body_pos_mode", "relative")) != "relative"
+    )
+    if not needs_window_stats:
+        return
+
+    required = ["stats_type", "root_relative", "fps", "history_len", "pred_len", "joint_vel_mode", "body_pos_mode"]
+    missing = [key for key in required if key not in payload]
+    if missing:
+        raise ValueError(
+            f"stats_path={path} is missing training-space metadata {missing}. "
+            "For root-relative/model-space training, compute stats with scripts/compute_stats.py "
+            "using --root_relative and matching fps/history_len/pred_len options."
+        )
+
+    expected: dict[str, Any] = {
+        "stats_type": "sampled_window",
+        "root_relative": bool(data_cfg.get("root_relative", False)),
+        "fps": float(data_cfg.get("fps", 50.0)),
+        "history_len": int(data_cfg["history_len"]),
+        "pred_len": int(data_cfg["pred_len"]),
+        "joint_vel_mode": str(data_cfg.get("joint_vel_mode", "source")),
+        "body_pos_mode": str(data_cfg.get("body_pos_mode", "relative")),
+    }
+    bad: list[str] = []
+    for key, value in expected.items():
+        actual = payload.get(key)
+        if isinstance(value, float):
+            if abs(float(actual) - value) > 1e-6:
+                bad.append(f"{key}={actual} expected={value}")
+        elif actual != value:
+            bad.append(f"{key}={actual} expected={value}")
+    if bad:
+        preview = "\n  ".join(bad)
+        raise ValueError(f"stats_path={path} is incompatible with config:\n  {preview}")
+
+    print(f"[data] checked stats metadata: {path}", flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="configs/default.yaml")
@@ -178,6 +229,7 @@ def main() -> None:
 
     data_cfg = cfg["data"]
     attach_stats_hash(data_cfg)
+    validate_stats_metadata(data_cfg)
     validate_processed_manifest_metadata(data_cfg, "train")
     if data_cfg.get("val_file_list"):
         validate_processed_manifest_metadata(data_cfg, "val")

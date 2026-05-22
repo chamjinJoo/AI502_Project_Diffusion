@@ -24,9 +24,11 @@ env/
 data/
 processed_dataset/*
 processed_dataset_*/
-!processed_dataset/stats/
-processed_dataset/stats/*
-!processed_dataset/stats/stats.json
+!processed_dataset_10hz/
+processed_dataset_10hz/*
+!processed_dataset_10hz/stats/
+processed_dataset_10hz/stats/*
+!processed_dataset_10hz/stats/root_relative_delta_window_stats.json
 checkpoints/*
 !checkpoints/pred_len10/
 !checkpoints/pred_len10/README.md

@@ -1,8 +1,7 @@
 source_roots:
-  # Change this to the actual BONES-SEED / Unitree G1 CSV directory.
-  # Relative paths are resolved from the project root when commands are run there.
+  # BONES-SEED / Unitree G1 CSV directory.
   - data/raw/bones_seed_g1
-output_root: processed_dataset
+output_root: processed_dataset_10hz
 dataset_category: locomotion
 include_keywords:
   - walk
