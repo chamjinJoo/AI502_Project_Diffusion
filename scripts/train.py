@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import random
 from datetime import datetime
@@ -151,6 +152,19 @@ def expand_checkpoint_dir(cfg: dict[str, Any]) -> None:
         print(f"[config] checkpoint_dir={expanded}", flush=True)
 
 
+def attach_stats_hash(data_cfg: dict[str, Any]) -> None:
+    """Record the stats file hash in the run config for checkpoint auditability."""
+    stats_path = data_cfg.get("stats_path")
+    if not stats_path:
+        return
+    path = Path(stats_path)
+    if not path.exists():
+        return
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    data_cfg["stats_sha256"] = digest
+    print(f"[data] stats_path={path} sha256={digest}", flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="configs/default.yaml")
@@ -163,6 +177,7 @@ def main() -> None:
     set_seed(int(cfg["seed"]))
 
     data_cfg = cfg["data"]
+    attach_stats_hash(data_cfg)
     validate_processed_manifest_metadata(data_cfg, "train")
     if data_cfg.get("val_file_list"):
         validate_processed_manifest_metadata(data_cfg, "val")

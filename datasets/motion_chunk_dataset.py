@@ -208,6 +208,24 @@ def load_stats(path: str | Path) -> tuple[np.ndarray, np.ndarray]:
     return np.asarray(payload["mean"], dtype=np.float32), np.asarray(payload["std"], dtype=np.float32)
 
 
+def stats_from_checkpoint(checkpoint: dict[str, Any]) -> tuple[np.ndarray, np.ndarray] | None:
+    """Return normalization stats embedded in a checkpoint, if present."""
+    payload = checkpoint.get("normalization_stats")
+    if not isinstance(payload, dict) or "mean" not in payload or "std" not in payload:
+        return None
+    mean = np.asarray(payload["mean"], dtype=np.float32)
+    std = np.asarray(payload["std"], dtype=np.float32)
+    return mean, np.maximum(std, 1e-6)
+
+
+def load_checkpoint_stats_or_file(checkpoint: dict[str, Any], path: str | Path) -> tuple[np.ndarray, np.ndarray]:
+    """Prefer checkpoint-embedded stats, falling back to a stats file for old checkpoints."""
+    stats = stats_from_checkpoint(checkpoint)
+    if stats is not None:
+        return stats
+    return load_stats(path)
+
+
 class MotionChunkDataset(Dataset):
     """Return history-conditioned future chunks from [T, 65] motion sequences."""
 
@@ -319,7 +337,9 @@ class MotionChunkDataset(Dataset):
             raise RuntimeError("MotionChunkDataset requires a working PyTorch installation for __getitem__.")
         if self.random_window_sampling:
             index = random.randrange(self.total_windows)
-        seq_idx, t = self._index_to_window(index % self.total_windows)
+        else:
+            index = index % self.total_windows
+        seq_idx, t = self._index_to_window(index)
         sequence = self.sequences[seq_idx]
         cond = sequence[t - self.history_len + 1 : t + 1]  # [H, 65]
         target = sequence[t + 1 : t + 1 + self.pred_len]  # [K, 65]

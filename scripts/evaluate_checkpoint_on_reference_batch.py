@@ -17,7 +17,7 @@ sys.path.append(str(ROOT))
 from datasets.motion_chunk_dataset import (  # noqa: E402
     apply_model_space_transforms,
     decode_future_model_space,
-    load_stats,
+    load_checkpoint_stats_or_file,
 )
 from scripts.evaluate_checkpoint_windows import _load_model  # noqa: E402
 from scripts.evaluate_reference_quality import reference_quality_metrics  # noqa: E402
@@ -50,6 +50,7 @@ def main() -> None:
     parser.add_argument("--cond_batch", required=True, help="Reference-space histories [N,H,65]")
     parser.add_argument("--target_batch", required=True, help="Reference-space targets [N,K,65]")
     parser.add_argument("--output_dir", required=True)
+    parser.add_argument("--stats", default=None, help="Optional stats path for old checkpoints without embedded stats")
     parser.add_argument("--num_inference_steps", type=int, default=None)
     parser.add_argument("--seed", type=int, default=123)
     parser.add_argument("--num_named", type=int, default=9)
@@ -73,7 +74,7 @@ def main() -> None:
     if target_ref.shape[1] != pred_len:
         raise ValueError(f"target horizon {target_ref.shape[1]} does not match checkpoint pred_len {pred_len}")
 
-    mean, std = load_stats(data_cfg["stats_path"])
+    mean, std = load_checkpoint_stats_or_file(ckpt, args.stats or data_cfg["stats_path"])
     mean = mean.astype(np.float32)
     std = np.maximum(std.astype(np.float32), 1e-6)
 

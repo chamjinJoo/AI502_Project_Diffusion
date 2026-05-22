@@ -1,0 +1,73 @@
+seed: 42
+
+data:
+  train_paths: []
+  val_paths: []
+  train_file_list: processed_dataset_10hz/manifests/train_manifest.jsonl
+  val_file_list: processed_dataset_10hz/manifests/val_manifest.jsonl
+  train_data_dir: null
+  val_data_dir: null
+  stats_path: processed_dataset_10hz/stats/stats.json
+  val_split: 0.0
+  frame_dim: 65
+  fps: 10
+  source_fps_if_assumed: 120
+  root_relative: true
+  joint_vel_mode: source
+  body_pos_mode: relative
+  history_len: 20
+  pred_len: 10
+
+training:
+  batch_size: 512
+  epochs: 5000
+  train_samples_per_epoch: 8192
+  val_samples_per_epoch: 1024
+  random_window_sampling: true
+  num_workers: 4
+  lr: 0.0001
+  weight_decay: 0.0001
+  grad_clip: 1.0
+  velocity_loss_weight: 0.05
+  quaternion_loss_weight: 0.001
+  continuity_loss_weight: 0.1
+  joint_x0_loss_weight: 0.02
+  acceleration_loss_weight: 0.02
+  auxiliary_max_timestep: 500
+  sample_eval_interval: 25
+  sample_eval_batches: 1
+  sample_eval_num_inference_steps: 10
+  sample_eval_weight: 0.02
+  checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_pred_len10_fps10_{date}
+  resume: false
+  use_wandb: false
+  device: cuda
+
+diffusion:
+  num_train_timesteps: 1000
+  num_inference_steps: 30
+  beta_schedule: squaredcos_cap_v2
+  prediction_type: epsilon
+  clip_sample: true
+  objective: rectified_flow
+  flow_solver: euler
+
+model:
+  architecture: transformer
+  conditioning_mode: history
+  dim: 256
+  num_layers: 4
+  num_heads: 4
+  dropout: 0.1
+  condition_encoder: transformer
+  condition_summary: flatten
+  down_dims:
+    - 256
+    - 512
+    - 1024
+  kernel_size: 3
+  n_groups: 8
+  cond_predict_scale: false
+  use_time_token: true
+  use_segment_embedding: true
+  use_local_condition: false

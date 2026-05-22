@@ -17,7 +17,7 @@ sys.path.append(str(ROOT))
 from datasets.motion_chunk_dataset import (  # noqa: E402
     apply_model_space_transforms,
     decode_future_model_space,
-    load_stats,
+    load_checkpoint_stats_or_file,
     make_root_relative,
 )
 from diffusion.scheduler_wrapper import DiffusionSchedulerWrapper  # noqa: E402
@@ -165,6 +165,7 @@ def main() -> None:
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--manifest", default=None)
     parser.add_argument("--output_dir", default="samples/checkpoint_eval")
+    parser.add_argument("--stats", default=None, help="Optional stats path for old checkpoints without embedded stats")
     parser.add_argument("--num_eval", type=int, default=64)
     parser.add_argument("--num_visual", type=int, default=9)
     parser.add_argument("--seed", type=int, default=123)
@@ -180,7 +181,7 @@ def main() -> None:
     data_cfg = cfg["data"]
     manifest = args.manifest or data_cfg.get("val_file_list") or data_cfg.get("train_file_list")
     paths = _manifest_paths(manifest)
-    mean, std = load_stats(data_cfg["stats_path"])
+    mean, std = load_checkpoint_stats_or_file(ckpt, args.stats or data_cfg["stats_path"])
     std = np.maximum(std.astype(np.float32), 1e-6)
     mean = mean.astype(np.float32)
 

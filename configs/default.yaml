@@ -13,7 +13,7 @@ data:
   stats_path: processed_dataset/stats/stats.json
   val_split: 0.0
   frame_dim: 65
-  fps: 50
+  fps: 10
   source_fps_if_assumed: 120
   root_relative: true
   joint_vel_mode: source
@@ -41,7 +41,7 @@ training:
   sample_eval_batches: 1
   sample_eval_num_inference_steps: 10
   sample_eval_weight: 0.02
-  checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_pred_len10_fps120_{date}
+  checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_pred_len10_fps10_{date}
   resume: false
   use_wandb: false
   device: cuda

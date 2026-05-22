@@ -23,6 +23,7 @@ env/
 # Large datasets and generated artifacts
 data/
 processed_dataset/*
+processed_dataset_*/
 !processed_dataset/stats/
 processed_dataset/stats/*
 !processed_dataset/stats/stats.json
@@ -30,6 +31,7 @@ checkpoints/*
 !checkpoints/pred_len10/
 !checkpoints/pred_len10/README.md
 !checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt
+checkpoints/pred_len10/stats.json
 trained_model/
 samples/*
 !samples/pred_len10/

@@ -28,6 +28,8 @@ cond   = sequence[t-H+1 : t+1]   # [20, 65]
 target = sequence[t+1   : t+1+K] # [10, 65]
 ```
 
+The default planner runs at **10 Hz**: `H=20` covers 2 seconds of history and `K=10` predicts a 1-second future goal chunk.
+
 At inference time the diffusion planner takes:
 
 ```text
@@ -69,7 +71,7 @@ root translation     -> body_pos
 Current preprocessing assumptions are in [configs/dataset_build.yaml](configs/dataset_build.yaml):
 
 ```yaml
-target_fps: 50
+target_fps: 10
 assume_fps_if_missing: 120
 source_joint_unit: degrees
 source_root_pos_unit: centimeters
@@ -131,7 +133,7 @@ Inspect source schemas:
 python data_prep/inspect_sources.py --config configs/dataset_build.yaml
 ```
 
-Build processed `[T, 65]` sequences, train/val manifests, stats, and reports:
+Build 10 Hz processed `[T, 65]` sequences, train/val manifests, stats, and reports:
 
 ```bash
 python data_prep/build_dataset.py --config configs/dataset_build.yaml
@@ -159,7 +161,7 @@ processed_dataset/manifests/val_manifest.jsonl
 processed_dataset/stats/stats.json
 ```
 
-`processed_dataset/stats/stats.json` stores the window-level normalization stats used by the current root-relative default config. It is not a summary of model-generated outputs; the checkpoint expects this file for condition normalization and denormalizing generated chunks.
+`processed_dataset/stats/stats.json` stores the 10 Hz root-relative normalization stats used by the current default config. It is not a summary of model-generated outputs; the checkpoint expects this file for condition normalization and denormalizing generated chunks.
 
 ## Root-Relative Pose Convention
 
@@ -197,7 +199,7 @@ During inference, the default rectified-flow sampler uses Euler integration.
 The denoiser interface is fixed as:
 
 ```text
-model(xt [B, K, 65], cond [B, H, 65], timestep [B]) -> eps_hat [B, K, 65]
+model(xt [B, K, 65], cond [B, H, 65], timestep [B]) -> v_hat [B, K, 65]
 ```
 
 The current recommended denoiser is the MDM-inspired Transformer implementation in [models/denoiser.py](models/denoiser.py). It keeps this project's direct 65D tracking-reference output while borrowing two simple sequence-design ideas from Motion Diffusion Model (MDM): a dedicated diffusion timestep token and explicit token-role separation.
@@ -215,7 +217,7 @@ The denoiser uses:
 - joint self-attention over `[timestep token, history tokens, noisy target tokens]`
 - segment embeddings that distinguish timestep, history, and target tokens
 
-The default training config is the recommended MDM-style Transformer setup:
+The default training config is the recommended 10 Hz MDM-style Transformer setup:
 
 ```yaml
 model:
@@ -227,7 +229,7 @@ model:
 data:
   history_len: 20
   pred_len: 10
-  fps: 50
+  fps: 10
 
 training:
   velocity_loss_weight: 0.05
@@ -253,7 +255,7 @@ Recommended checkpoint:
 checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt
 ```
 
-This is the recommended `pred_len=10` root-relative rectified-flow MDM-style
+This is the recommended 10 Hz `pred_len=10` root-relative rectified-flow MDM-style
 Transformer checkpoint. It expects `processed_dataset/stats/stats.json` for
 normalization.
 
@@ -281,7 +283,7 @@ Install an equivalent Python environment with PyTorch, NumPy, PyYAML, and Huggin
 
 ## Train
 
-Train the default MDM-style Transformer configuration:
+Train the default 10 Hz MDM-style Transformer configuration:
 
 ```bash
 python scripts/train.py --config configs/default.yaml
@@ -290,7 +292,7 @@ python scripts/train.py --config configs/default.yaml
 `training.checkpoint_dir` may contain date tokens that are expanded at train launch time:
 
 ```yaml
-checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_pred_len10_fps120_{date}
+checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_pred_len10_fps10_{date}
 ```
 
 Supported tokens are `{date}` -> `YYYYMMDD` and `{datetime}` -> `YYYYMMDD_HHMMSS`.
@@ -305,7 +307,7 @@ Sample from a condition history:
 python scripts/sample.py \
   --checkpoint checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt \
   --cond path/to/cond_history.npy \
-  --num_inference_steps 50 \
+  --num_inference_steps 30 \
   --denormalize \
   --normalize_quat \
   --output samples/predicted_chunk.npy
@@ -318,7 +320,7 @@ python scripts/sample.py \
   --checkpoint checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt \
   --cond path/to/cond_history.npy \
   --x_T path/to/initial_noise_x_T.npy \
-  --num_inference_steps 50 \
+  --num_inference_steps 30 \
   --denormalize \
   --normalize_quat \
   --output samples/predicted_chunk.npy
@@ -326,7 +328,7 @@ python scripts/sample.py \
 
 `--normalize_quat` normalizes the generated `body_quat` channels after sampling.
 By default, use the model-predicted `joint_vel` channels. `--reconstruct_velocity
---fps 50` can replace them with finite differences of predicted joint positions,
+--fps 10` can replace them with finite differences of predicted joint positions,
 but this may amplify noise if the generated joint positions are not smooth.
 
 Included GIF visualizations from the recommended root-relative checkpoint:
@@ -360,7 +362,7 @@ python scripts/export_reference.py \
   --output_dir exports/reference \
   --already_denormalized \
   --reconstruct_velocity \
-  --fps 50
+  --fps 10
 ```
 
 This writes:

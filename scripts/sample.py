@@ -12,7 +12,12 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
-from datasets.motion_chunk_dataset import apply_model_space_transforms, decode_future_model_space, load_stats, make_root_relative
+from datasets.motion_chunk_dataset import (
+    apply_model_space_transforms,
+    decode_future_model_space,
+    load_checkpoint_stats_or_file,
+    make_root_relative,
+)
 from diffusion.scheduler_wrapper import DiffusionSchedulerWrapper
 from models.denoiser import ConditionalDenoiser
 
@@ -25,6 +30,7 @@ def main() -> None:
     parser.add_argument("--x_T", type=str, default=None, help="Optional .npy initial noise shaped [K, 65] or [B, K, 65]")
     parser.add_argument("--num_inference_steps", type=int, default=None)
     parser.add_argument("--ddim_steps", type=int, default=None, help="Deprecated alias for --num_inference_steps")
+    parser.add_argument("--stats", type=str, default=None, help="Optional stats path for old checkpoints without embedded stats")
     parser.add_argument("--denormalize", action="store_true")
     parser.add_argument("--normalize_quat", action="store_true", help="Normalize body_quat(w,x,y,z) after sampling")
     parser.add_argument("--reconstruct_velocity", action="store_true", help="Replace joint_vel with finite differences")
@@ -80,7 +86,7 @@ def main() -> None:
         joint_vel_mode=str(data_cfg.get("joint_vel_mode", "source")),
         body_pos_mode=str(data_cfg.get("body_pos_mode", "relative")),
     )
-    mean, std = load_stats(data_cfg["stats_path"])
+    mean, std = load_checkpoint_stats_or_file(ckpt, args.stats or data_cfg["stats_path"])
     cond_np = (cond_np - mean) / std
     cond = torch.from_numpy(cond_np[None]).to(device)  # [1, H, 65]
 

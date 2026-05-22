@@ -127,6 +127,7 @@ class Trainer:
         selection_loss: float | None = None,
     ) -> None:
         path = self.checkpoint_dir / name
+        stats_payload = self._normalization_stats_payload()
         torch.save(
             {
                 "epoch": epoch,
@@ -139,9 +140,24 @@ class Trainer:
                 "best_val": self.best_val,
                 "config": self.cfg,
                 "scheduler_config": self.diffusion.scheduler_config(),
+                "normalization_stats": stats_payload,
             },
             path,
         )
+
+    def _normalization_stats_payload(self) -> dict[str, Any] | None:
+        """Serialize model-space normalization stats into the checkpoint."""
+        mean = getattr(self.diffusion, "norm_mean", None)
+        std = getattr(self.diffusion, "norm_std", None)
+        if mean is None or std is None or mean.numel() == 0 or std.numel() == 0:
+            return None
+        data_cfg = self.cfg.get("data", {})
+        return {
+            "mean": mean.detach().cpu().reshape(-1).float().tolist(),
+            "std": std.detach().cpu().reshape(-1).float().clamp_min(1e-6).tolist(),
+            "source_path": data_cfg.get("stats_path"),
+            "source_sha256": data_cfg.get("stats_sha256"),
+        }
 
     def _try_resume(self) -> None:
         """Resume from latest.pt if it exists in the checkpoint directory."""
@@ -250,6 +266,19 @@ class Trainer:
                 raise RuntimeError(
                     f"Refusing to resume {path}: checkpoint data.{key}={previous_value!r}, "
                     f"current data.{key}={current_value!r}. Use a separate checkpoint_dir or set resume: false."
+                )
+
+        checkpoint_stats = checkpoint.get("normalization_stats")
+        current_stats = self._normalization_stats_payload()
+        if isinstance(checkpoint_stats, dict) and isinstance(current_stats, dict):
+            previous_mean = torch.tensor(checkpoint_stats["mean"], dtype=torch.float32)
+            previous_std = torch.tensor(checkpoint_stats["std"], dtype=torch.float32)
+            current_mean = torch.tensor(current_stats["mean"], dtype=torch.float32)
+            current_std = torch.tensor(current_stats["std"], dtype=torch.float32)
+            if not (torch.allclose(previous_mean, current_mean) and torch.allclose(previous_std, current_std)):
+                raise RuntimeError(
+                    f"Refusing to resume {path}: checkpoint normalization stats differ from current data.stats_path. "
+                    "Use the original stats, refresh the dataset cache, or start a new checkpoint_dir."
                 )
 
     def train_epoch(self, epoch: int) -> dict[str, float]:

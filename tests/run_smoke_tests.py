@@ -14,6 +14,7 @@ from test_smoke import (
     test_auxiliary_losses_use_fps_and_stats,
     test_checkpoint_resume_rejects_incompatible_architecture,
     test_checkpoint_resume_preserves_best_val_and_scaler,
+    test_checkpoint_embedded_stats_override_file,
     test_conditional_unet_mean_summary_backward_compat_output_shape,
     test_conditional_unet_denoiser_output_shape,
     test_csv_export_formatting,
@@ -81,6 +82,8 @@ def main() -> None:
         test_csv_export_formatting(Path(tmp))
     with TemporaryDirectory() as tmp:
         test_checkpoint_resume_preserves_best_val_and_scaler(Path(tmp))
+    with TemporaryDirectory() as tmp:
+        test_checkpoint_embedded_stats_override_file(Path(tmp))
     with TemporaryDirectory() as tmp:
         test_checkpoint_resume_rejects_incompatible_architecture(Path(tmp))
     print("smoke tests passed")

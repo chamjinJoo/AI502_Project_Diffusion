@@ -24,11 +24,11 @@ exclude_keywords:
   - handle
   - crank
 
-target_fps: 50
+target_fps: 10
 source_joint_unit: degrees
 source_root_pos_unit: centimeters
 source_root_euler_unit: degrees
-min_sequence_length: 20
+min_sequence_length: 30
 val_ratio: 0.1
 split_seed: 42
 strict_mode: true

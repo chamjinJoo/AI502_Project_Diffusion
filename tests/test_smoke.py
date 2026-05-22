@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +15,7 @@ from datasets.motion_chunk_dataset import (
     MotionChunkDataset,
     apply_model_space_transforms,
     decode_future_model_space,
+    load_checkpoint_stats_or_file,
     make_root_relative,
 )
 from data_prep.convert_bones_seed_to_internal import convert_one_csv
@@ -64,6 +66,8 @@ class TinyDiffusion(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.model = nn.Linear(1, 1)
+        self.register_buffer("norm_mean", torch.arange(65, dtype=torch.float32).view(1, 1, 65), persistent=False)
+        self.register_buffer("norm_std", torch.ones(1, 1, 65, dtype=torch.float32) * 2.0, persistent=False)
 
     def scheduler_config(self) -> dict[str, int]:
         return {"num_train_timesteps": 4}
@@ -631,11 +635,25 @@ def test_checkpoint_resume_preserves_best_val_and_scaler(tmp_path: Path) -> None
     checkpoint = torch.load(tmp_path / "latest.pt", map_location="cpu", weights_only=True)
     assert checkpoint["best_val"] == 0.123
     assert "scaler" in checkpoint
+    assert checkpoint["normalization_stats"]["mean"] == list(range(65))
+    assert checkpoint["normalization_stats"]["std"] == [2.0] * 65
 
     cfg["training"]["resume"] = True
     resumed = Trainer(TinyDiffusion(), DataLoader([]), None, cfg)
     assert resumed.start_epoch == 1
     assert resumed.best_val == 0.123
+
+
+def test_checkpoint_embedded_stats_override_file(tmp_path: Path) -> None:
+    file_stats = tmp_path / "stats.json"
+    file_stats.write_text(
+        json.dumps({"mean": [9.0] * 65, "std": [9.0] * 65}),
+        encoding="utf-8",
+    )
+    checkpoint = {"normalization_stats": {"mean": [1.0] * 65, "std": [2.0] * 65}}
+    mean, std = load_checkpoint_stats_or_file(checkpoint, file_stats)
+    np.testing.assert_allclose(mean, np.ones(65, dtype=np.float32))
+    np.testing.assert_allclose(std, np.ones(65, dtype=np.float32) * 2.0)
 
 
 def test_checkpoint_resume_rejects_incompatible_architecture(tmp_path: Path) -> None:
