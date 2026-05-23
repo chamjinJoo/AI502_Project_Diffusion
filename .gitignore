@@ -33,6 +33,7 @@ checkpoints/*
 !checkpoints/pred_len10/
 !checkpoints/pred_len10/README.md
 !checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt
+!checkpoints/pred_len10/rectified_flow_mdm_root_relative_low_aux.pt
 checkpoints/pred_len10/stats.json
 trained_model/
 samples/*

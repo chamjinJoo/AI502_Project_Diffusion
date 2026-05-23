@@ -194,7 +194,16 @@ Recommended checkpoint:
 checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt
 ```
 
-This file currently contains the job 860 model: a 10 Hz `pred_len=10` root-relative/delta rectified-flow MDM-style Transformer checkpoint. Example GIF visualizations are included under:
+This file currently contains the job 860 model: a 10 Hz `pred_len=10` root-relative/delta rectified-flow MDM-style Transformer checkpoint.
+
+Additional low-auxiliary-loss candidate:
+
+```text
+checkpoints/pred_len10/rectified_flow_mdm_root_relative_low_aux.pt
+configs/rectified_flow_mdm_root_relative_10hz_delta_low_aux.yaml
+```
+
+This job 863 candidate uses the same data/model/diffusion setup but lowers auxiliary loss coefficients so the rectified-flow objective dominates more strongly. Example GIF visualizations are included under:
 
 ```text
 samples/pred_len10/rectified_flow_mdm_root_relative/*.gif
