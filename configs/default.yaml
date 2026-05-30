@@ -55,7 +55,7 @@ diffusion:
 model:
   architecture: transformer
   conditioning_mode: history
-  dim: 256
+  dim: 128 # 256
   num_layers: 4
   num_heads: 4
   dropout: 0.1

@@ -28,3 +28,12 @@ processed_dataset_10hz/stats/root_relative_delta_window_stats.json
 ```
 
 New checkpoints embed normalization stats, so most sampling/evaluation scripts can load the stats directly from the checkpoint.
+
+Additional smaller-model checkpoint:
+
+```text
+rectified_flow_mdm_root_relative_dim128.pt
+```
+
+This is the job 1272 dim=128 candidate. It uses the same data/diffusion/training setup as the primary
+checkpoint but with `model.dim: 128` (half the hidden size) instead of 256.
