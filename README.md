@@ -58,8 +58,8 @@ Root position and root orientation are not silently fabricated. Clips missing re
 Raw and processed motion data are mostly excluded from git because they are large downloaded/generated artifacts. The repository includes only the small files needed to run the curated model:
 
 ```text
-checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt
-samples/pred_len10/rectified_flow_mdm_root_relative/*.gif
+checkpoints/pred_len10/(model_name).pt
+samples/pred_len10/(model_name)/*.gif
 processed_dataset_10hz/stats/root_relative_delta_window_stats.json
 ```
 
@@ -82,18 +82,18 @@ huggingface-cli download bones-studio/seed \
   --local-dir data/raw/bones_seed_g1
 ```
 
-If the downloaded layout differs, keep the relevant BONES-SEED / Unitree G1 MuJoCo CSV tree under `data/raw/bones_seed_g1`, or edit `source_roots` in [configs/dataset_build.yaml](configs/dataset_build.yaml).
+If the downloaded layout differs, keep the relevant BONES-SEED / Unitree G1 MuJoCo CSV tree under `data/raw/bones_seed_g1`, or edit `source_roots` in [configs/dataset_build_10hz.yaml](configs/dataset_build_10hz.yaml).
 
 Inspect source schemas:
 
 ```bash
-python data_prep/inspect_sources.py --config configs/dataset_build.yaml
+python data_prep/inspect_sources.py --config configs/datasedataset_build_10hzt_build.yaml
 ```
 
 Build 10 Hz processed sequences, manifests, initial raw stats, and reports:
 
 ```bash
-python data_prep/build_dataset.py --config configs/dataset_build.yaml
+python data_prep/build_dataset.py --config configs/dataset_build_10hz.yaml
 ```
 
 Compute the sampled-window stats used by the default model:
@@ -114,7 +114,7 @@ python scripts/compute_stats.py \
 Run sanity checks:
 
 ```bash
-python data_prep/sanity_check.py --config configs/dataset_build.yaml
+python data_prep/sanity_check.py --config configs/dataset_build_10hz.yaml
 ```
 
 Training uses:
@@ -191,22 +191,17 @@ Auxiliary losses encourage velocity consistency, unit quaternions, smoothness, a
 Recommended checkpoint:
 
 ```text
-checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt
+checkpoints/pred_len10/rectified_flow_512_12layer_8head.pt
 ```
 
-This file currently contains the job 860 model: a 10 Hz `pred_len=10` root-relative/delta rectified-flow MDM-style Transformer checkpoint.
+This file currently contains a hevier model than default setting: a 10 Hz `pred_len=10` root-relative/delta rectified-flow MDM-style Transformer checkpoint with 512 dim, 12-depth layer, and total 8 multi-head.
 
 Additional low-auxiliary-loss candidate:
 
-```text
-checkpoints/pred_len10/rectified_flow_mdm_root_relative_low_aux.pt
-configs/rectified_flow_mdm_root_relative_10hz_delta_low_aux.yaml
-```
-
-This job 863 candidate uses the same data/model/diffusion setup but lowers auxiliary loss coefficients so the rectified-flow objective dominates more strongly. Example GIF visualizations are included under:
+Example GIF visualizations are included under:
 
 ```text
-samples/pred_len10/rectified_flow_mdm_root_relative/*.gif
+samples/pred_len10/(model_name)/*.gif
 ```
 
 The sample directory intentionally contains GIF files only, so it stays small enough for git.
@@ -229,7 +224,7 @@ Install an equivalent Python environment with PyTorch, NumPy, PyYAML, and Huggin
 Train the default 10 Hz configuration:
 
 ```bash
-python scripts/train.py --config configs/default.yaml
+python scripts/train.py --config configs/default_10hz.yaml
 ```
 
 `training.checkpoint_dir` may contain date tokens expanded at train launch time:
@@ -248,7 +243,7 @@ Sample from a condition history:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt \
+  --checkpoint checkpoints/pred_len10/(model_name).pt \
   --cond path/to/cond_history.npy \
   --num_inference_steps 30 \
   --denormalize \
@@ -260,7 +255,7 @@ Sample with externally supplied initial noise `x_T`:
 
 ```bash
 python scripts/sample.py \
-  --checkpoint checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt \
+  --checkpoint checkpoints/pred_len10/(model_name).pt \
   --cond path/to/cond_history.npy \
   --x_T path/to/initial_noise_x_T.npy \
   --num_inference_steps 30 \
@@ -312,7 +307,7 @@ Run a compact post-training check from a checkpoint:
 
 ```bash
 python scripts/post_training_eval.py \
-  --checkpoint checkpoints/pred_len10/rectified_flow_mdm_root_relative.pt \
+  --checkpoint checkpoints/pred_len10/(model_name).pt \
   --output_dir samples/post_training_eval \
   --num_eval 256 \
   --num_visual 18 \

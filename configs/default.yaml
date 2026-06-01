@@ -38,7 +38,7 @@ training:
   sample_eval_batches: 1
   sample_eval_num_inference_steps: 10
   sample_eval_weight: 0.02
-  checkpoint_dir: checkpoints/rectified_flow_mdm_rootrel_delta_pred_len10_fps10_windowstats_{date}
+  checkpoint_dir: checkpoints/rectified_flow_mdm_root_relative
   resume: false
   use_wandb: false
   device: cuda
@@ -55,7 +55,7 @@ diffusion:
 model:
   architecture: transformer
   conditioning_mode: history
-  dim: 128 # 256
+  dim: 256
   num_layers: 4
   num_heads: 4
   dropout: 0.1
