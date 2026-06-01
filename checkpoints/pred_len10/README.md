@@ -3,8 +3,7 @@
 Primary checkpoint:
 
 ```text
-rectified_flow_512_12layer_8head
-.pt
+rectified_flow_512_12layer_8head.pt
 ```
 
 This is the 10 Hz window-stats model: an MDM-inspired Transformer denoiser trained with
